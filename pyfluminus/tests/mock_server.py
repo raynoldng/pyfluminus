@@ -5,6 +5,7 @@ import socket
 from threading import Thread
 import os
 
+from urllib.parse import urlparse
 import requests
 
 FIXTURES_PATH = os.path.join(os.path.dirname(__file__), "fixtures")
@@ -46,10 +47,9 @@ class MockServerRequestHandler(BaseHTTPRequestHandler):
             request = fixture["request"]
             return (
                 request_handler.command == request["method"]
-                and request_handler.path == request["request_path"]
+                and urlparse(request_handler.path).path == request["request_path"]
             )
 
-        # find the right fixture
         response = next(fix["response"] for fix in api_fixtures if match(self, fix))
 
         # Add response content.
@@ -71,7 +71,6 @@ def get_free_port():
 
 
 def start_mock_server(port):
-    print("FUCK mock")
     mock_server = HTTPServer(("localhost", port), MockServerRequestHandler)
     mock_server_thread = Thread(target=mock_server.serve_forever)
     mock_server_thread.setDaemon(True)
