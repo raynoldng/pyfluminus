@@ -31,21 +31,25 @@ sample_file = File(
 
 
 def file_equality(f1, f2, msg=None):
-    if (
+    assert (
         f1.id == f2.id
         and f1.name == f2.name
         and f1.directory == f2.directory
         and f1.allow_upload == f2.allow_upload
         and f1.multimedia == f2.multimedia
-    ):
-        if f1.children is None and f2.children is None:
-            return True
-        return len(f1.children) == len(f2.children) and all(
-            file_equality(f1_child, f2_child)
-            for f1_child, f2_child in zip(f1.children, f2.children)
-        )
+    ), "file attributes differ"
 
-    return False
+    if f1.children is None or f2.children is None:
+        return True
+    if len(f1.children) == len(f2.children) == 0:
+        return True
+
+    assert len(f1.children) == len(f2.children) and all(
+        file_equality(f1_child, f2_child)
+        for f1_child, f2_child in zip(f1.children, f2.children)
+    ), "file children differ"
+
+    return True
 
 
 class TestFiles(unittest.TestCase):
@@ -58,31 +62,33 @@ class TestFiles(unittest.TestCase):
         self.addTypeEqualityFunc(File, file_equality)
 
     def test_files_from_module(self):
-        file = File.from_module(authorization, module)
-        expected_file = File(
-            id="40582141-1a1d-41b6-ba3a-efa44ff7fd05",
-            name="ST2334",
-            directory=False,
-            children=[
-                File(
-                    id="7c464b62-3811-4c87-b1d1-7407e6ec321b",
-                    name="Tutorial Questions",
-                    directory=True,
-                    children=None,
-                    allow_upload=False,
-                    multimedia=False,
-                ),
-                File(
-                    id="5a9525ba-e90c-44aa-a659-267bbf508d11",
-                    name="Lecture Notes",
-                    directory=True,
-                    children=None,
-                    allow_upload=False,
-                    multimedia=False,
-                ),
-            ],
-            allow_upload=False,
-            multimedia=False,
-        )
-        self.assertEqual(expected_file, file)
+        with patch.dict("pyfluminus.api.__dict__", MOCK_CONSTANTS):
+            file = api.get_file_from_module(authorization, module)
+            expected_file = File(
+                id="40582141-1a1d-41b6-ba3a-efa44ff7fd05",  # id of ST2334
+                name="ST2334",
+                directory=True,
+                children=[
+                    File(
+                        id="7c464b62-3811-4c87-b1d1-7407e6ec321b",
+                        name="Tutorial Questions",
+                        directory=True,
+                        children=None,
+                        allow_upload=False,
+                        multimedia=False,
+                    ),
+                    File(
+                        id="5a9525ba-e90c-44aa-a659-267bbf508d11",
+                        name="Lecture Notes",
+                        directory=True,
+                        children=None,
+                        allow_upload=False,
+                        multimedia=False,
+                    ),
+                ],
+                allow_upload=False,
+                multimedia=False,
+            )
+            # import pdb; pdb.set_trace()
+            self.assertEqual(expected_file, file)
 

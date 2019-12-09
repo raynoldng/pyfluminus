@@ -1,5 +1,5 @@
 from pyfluminus.constants import OCP_SUBSCRIPTION_KEY, API_BASE_URL
-from pyfluminus.structs import Module
+from pyfluminus.structs import Module, File
 
 import requests
 import urllib.parse as parse
@@ -56,10 +56,40 @@ def modules(auth: Dict, current_term_only: bool = False) -> List[Module]:
     return {"error": {"unexpected_response": response}}
 
 
-def get_children(auth: Dict, id: str, allow_upload: bool):
-    directory_children_data = api(auth, "files/?ParentID={}".format(id))['data']
-    
-    
+def get_file_from_module(auth: Dict, module: Module) -> File:
+    return File(
+        id=module.id,
+        name=module.code,
+        directory=True,
+        children=get_children(auth, module.id, allow_upload=False),
+        allow_upload=False,
+        multimedia=False,
+    )
+
+
+def get_children(auth: Dict, id: str, allow_upload: bool) -> List[File]:
+    directory_children = api(auth, "files/?ParentID={}".format(id))
+    directory_files = api(auth, "files/{}/file".format(id))
+    print(directory_children)
+    print(directory_files)
+
+    return [
+        parse_child(file_data, allow_upload)
+        for file_data in directory_children["data"] + directory_files["data"]
+    ]
+
+
+def parse_child(data: Dict, allow_upload: bool) -> File:
+    # TODO handle add creator name
+    is_directory = isinstance(data.get("access", None), dict)
+    return File(
+        id=data["id"],
+        name=data["name"],
+        directory=is_directory,
+        children=None if is_directory else [], # NOTE cargo culting logic used in fluminus
+        allow_upload=data.get("allowUpload", False),
+        multimedia=False,
+    )
 
 
 def api(auth: Dict, path: str, method="get", headers=None, data=None):
@@ -73,7 +103,7 @@ def api(auth: Dict, path: str, method="get", headers=None, data=None):
         }
     )
     # NOTE remove leading / else joined url is broken
-    uri = parse.urljoin(API_BASE_URL, path.rstrip('/'))
+    uri = parse.urljoin(API_BASE_URL, path.rstrip("/"))
     method = requests.get if method == "get" else requests.post
 
     response = method(uri, headers=headers, data=data)

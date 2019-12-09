@@ -1,5 +1,6 @@
 from typing import List, Dict
 
+
 class Module:
     def __init__(self, id: str, code: str, name: str, teaching: bool, term: str):
         """
@@ -74,6 +75,6 @@ class File:
         self.allow_upload = allow_upload
         self.multimedia = multimedia
 
-    @classmethod
-    def from_module(cls, auth: Dict, module: Module):
-        pass
+    def __str__(self):
+        return f"id: {self.id}, name: {self.name}, directory: {self.directory}, children: {self.children}, allow_upload: {self.allow_upload}, multimedia: {self.multimedia}"
+
