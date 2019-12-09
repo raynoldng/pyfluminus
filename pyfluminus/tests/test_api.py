@@ -80,3 +80,29 @@ class TestMockServer(unittest.TestCase):
             for mod1, mod2 in zip(result, expected_modules):
                 self.assertEqual(mod1, mod2)
 
+    def get_current_term_modules(self):
+        expected_modules = [
+            Module(
+                code="CS2100",
+                id="063773a9-43ac-4dc0-bdc6-4be2f5b50300",
+                name="Computer Organisation",
+                teaching=True,
+                term="1820",
+            ),
+            Module(
+                code="ST2334",
+                id="40582141-1a1d-41b6-ba3a-efa44ff7fd05",
+                name="Probability and Statistics",
+                teaching=False,
+                term="1820",
+            ),
+        ]
+        with patch.dict("pyfluminus.api.__dict__", MOCK_CONSTANTS):
+            result = api.modules(authorization, current_term_only=True)
+
+            result.sort(key=lambda mod: mod.id)
+            expected_modules.sort(key=lambda mod: mod.id)
+
+            self.assertEqual(len(result), len(expected_modules))
+            for mod1, mod2 in zip(result, expected_modules):
+                self.assertEqual(mod1, mod2)

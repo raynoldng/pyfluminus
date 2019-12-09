@@ -14,7 +14,7 @@ teaching_perms = [
     "access_Update",
     "access_Delete",
     "access_Settings_Read",
-    "access_Settings_Updat",
+    "access_Settings_Update",
 ]
 
 
