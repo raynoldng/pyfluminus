@@ -15,7 +15,7 @@ id_token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6ImEzck1VZ01Gdjl0UGNsTGE2
 authorization = {"jwt": id_token}
 
 
-class TestMockServer(unittest.TestCase):
+class TestAPI(unittest.TestCase):
     @classmethod
     def setup_class(cls):
         # TODO add mock server for auth

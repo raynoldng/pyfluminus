@@ -41,7 +41,7 @@ def current_term(auth: Dict) -> Dict:
 def modules(auth: Dict, current_term_only: bool = False) -> List[Module]:
     """ returns list of modules that user with given authorization is reading
     """
-    response = api(auth, "/module")
+    response = api(auth, "module")
     if "data" in response:
         return [
             Module(
@@ -49,11 +49,17 @@ def modules(auth: Dict, current_term_only: bool = False) -> List[Module]:
                 code=mod["name"],
                 name=mod["courseName"],
                 teaching=any(mod["access"].get(perm, False) for perm in teaching_perms),
-                term=mod['term'],
+                term=mod["term"],
             )
             for mod in response["data"]
         ]
     return {"error": {"unexpected_response": response}}
+
+
+def get_children(auth: Dict, id: str, allow_upload: bool):
+    directory_children_data = api(auth, "files/?ParentID={}".format(id))['data']
+    
+    
 
 
 def api(auth: Dict, path: str, method="get", headers=None, data=None):
@@ -66,7 +72,8 @@ def api(auth: Dict, path: str, method="get", headers=None, data=None):
             "Content-Type": "application/json",
         }
     )
-    uri = parse.urljoin(API_BASE_URL, path)
+    # NOTE remove leading / else joined url is broken
+    uri = parse.urljoin(API_BASE_URL, path.rstrip('/'))
     method = requests.get if method == "get" else requests.post
 
     response = method(uri, headers=headers, data=data)
