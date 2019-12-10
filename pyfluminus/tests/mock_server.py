@@ -80,3 +80,5 @@ def start_mock_server(port):
     mock_server_thread = Thread(target=mock_server.serve_forever)
     mock_server_thread.setDaemon(True)
     mock_server_thread.start()
+
+    return mock_server

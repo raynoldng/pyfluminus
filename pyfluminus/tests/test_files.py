@@ -56,39 +56,68 @@ class TestFiles(unittest.TestCase):
     @classmethod
     def setup_class(cls):
         # TODO add mock server for auth
-        start_mock_server(8082)  # for API
+        cls.mock_server = start_mock_server(8082)  # for API
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.mock_server.shutdown()
 
     def setUp(self):
         self.addTypeEqualityFunc(File, file_equality)
 
     def test_files_from_module(self):
         with patch.dict("pyfluminus.api.__dict__", MOCK_CONSTANTS):
-            file = api.get_file_from_module(authorization, module)
-            expected_file = File(
-                id="40582141-1a1d-41b6-ba3a-efa44ff7fd05",  # id of ST2334
-                name="ST2334",
-                directory=True,
-                children=[
-                    File(
-                        id="7c464b62-3811-4c87-b1d1-7407e6ec321b",
-                        name="Tutorial Questions",
-                        directory=True,
-                        children=None,
-                        allow_upload=False,
-                        multimedia=False,
-                    ),
-                    File(
-                        id="5a9525ba-e90c-44aa-a659-267bbf508d11",
-                        name="Lecture Notes",
-                        directory=True,
-                        children=None,
-                        allow_upload=False,
-                        multimedia=False,
-                    ),
-                ],
-                allow_upload=False,
-                multimedia=False,
-            )
-            # import pdb; pdb.set_trace()
-            self.assertEqual(expected_file, file)
+            file = File.from_module(authorization, module)
+        expected_file = File(
+            id="40582141-1a1d-41b6-ba3a-efa44ff7fd05",  # id of ST2334
+            name="ST2334",
+            directory=True,
+            children=[
+                File(
+                    id="7c464b62-3811-4c87-b1d1-7407e6ec321b",
+                    name="Tutorial Questions",
+                    directory=True,
+                    children=None,
+                    allow_upload=False,
+                    multimedia=False,
+                ),
+                File(
+                    id="5a9525ba-e90c-44aa-a659-267bbf508d11",
+                    name="Lecture Notes",
+                    directory=True,
+                    children=None,
+                    allow_upload=False,
+                    multimedia=False,
+                ),
+            ],
+            allow_upload=False,
+            multimedia=False,
+        )
+        # import pdb; pdb.set_trace()
+        self.assertEqual(expected_file, file)
 
+    def test_file_from_module_filename_sanitised(self):
+        # ignore the fields other than code are wrong
+        module = Module(
+            code="CS1231/MA1100",
+            id="40582141-1a1d-41b6-ba3a-efa44ff7fd05",
+            name="Probability and Statistics",
+            teaching=False,
+            term="1820",
+        )
+
+        with patch.dict("pyfluminus.api.__dict__", MOCK_CONSTANTS):
+            # file = api.get_file_from_module(authorization, module)
+            file = File.from_module(authorization, module)
+        self.assertEquals(file.name, "CS1231-MA1100")
+
+    # TODO implement tests for:
+    # - load children direcetory allow_upload prepends with creator name
+    # - load_children directory
+    # - load_children file
+    # - load_children already_loaded
+    # - get_download_url
+    # - download
+
+    # def test_get_download_url(self):
+    #     File.get_download_ur

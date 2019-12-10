@@ -1,4 +1,7 @@
+from __future__ import annotations
 from typing import List, Dict
+from pyfluminus import utils
+from pyfluminus.api import api
 
 
 class Module:
@@ -78,3 +81,40 @@ class File:
     def __str__(self):
         return f"id: {self.id}, name: {self.name}, directory: {self.directory}, children: {self.children}, allow_upload: {self.allow_upload}, multimedia: {self.multimedia}"
 
+
+    @classmethod
+    def from_module(cls, auth: Dict, module: Module) -> File:
+        return File(
+            id=module.id,
+            name=utils.sanitise_filename(module.code),
+            directory=True,
+            children=cls.get_children(auth, module.id, allow_upload=False),
+            allow_upload=False,
+            multimedia=False,
+        )
+
+    @classmethod
+    def get_children(cls, auth: Dict, id: str, allow_upload: bool) -> List[File]:
+        directory_children = api(auth, "files/?ParentID={}".format(id))
+        directory_files = api(auth, "files/{}/file".format(id))
+        print(directory_children)
+        print(directory_files)
+
+        return [
+            cls.parse_child(file_data, allow_upload)
+            for file_data in directory_children["data"] + directory_files["data"]
+        ]
+
+
+    @classmethod
+    def parse_child(cls, data: Dict, allow_upload: bool) -> File:
+        # TODO handle add creator name
+        is_directory = isinstance(data.get("access", None), dict)
+        return File(
+            id=data["id"],
+            name=data["name"],
+            directory=is_directory,
+            children=None if is_directory else [], # NOTE cargo culting logic used in fluminus
+            allow_upload=data.get("allowUpload", False),
+            multimedia=False,
+        )

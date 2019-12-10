@@ -1,12 +1,17 @@
+from __future__ import annotations
 from pyfluminus.constants import OCP_SUBSCRIPTION_KEY, API_BASE_URL
-from pyfluminus.structs import Module, File
+
+# from pyfluminus.structs import Module
+from pyfluminus import utils
 
 import requests
 import urllib.parse as parse
 import json
 
-from typing import Dict, List
+from typing import Dict, List, TYPE_CHECKING
 
+if TYPE_CHECKING:
+    from pyfluminus.structs import Module, File
 
 teaching_perms = [
     "access_Full",
@@ -41,6 +46,8 @@ def current_term(auth: Dict) -> Dict:
 def modules(auth: Dict, current_term_only: bool = False) -> List[Module]:
     """ returns list of modules that user with given authorization is reading
     """
+    from pyfluminus.structs import Module
+
     response = api(auth, "module")
     if "data" in response:
         return [
@@ -54,42 +61,6 @@ def modules(auth: Dict, current_term_only: bool = False) -> List[Module]:
             for mod in response["data"]
         ]
     return {"error": {"unexpected_response": response}}
-
-
-def get_file_from_module(auth: Dict, module: Module) -> File:
-    return File(
-        id=module.id,
-        name=module.code,
-        directory=True,
-        children=get_children(auth, module.id, allow_upload=False),
-        allow_upload=False,
-        multimedia=False,
-    )
-
-
-def get_children(auth: Dict, id: str, allow_upload: bool) -> List[File]:
-    directory_children = api(auth, "files/?ParentID={}".format(id))
-    directory_files = api(auth, "files/{}/file".format(id))
-    print(directory_children)
-    print(directory_files)
-
-    return [
-        parse_child(file_data, allow_upload)
-        for file_data in directory_children["data"] + directory_files["data"]
-    ]
-
-
-def parse_child(data: Dict, allow_upload: bool) -> File:
-    # TODO handle add creator name
-    is_directory = isinstance(data.get("access", None), dict)
-    return File(
-        id=data["id"],
-        name=data["name"],
-        directory=is_directory,
-        children=None if is_directory else [], # NOTE cargo culting logic used in fluminus
-        allow_upload=data.get("allowUpload", False),
-        multimedia=False,
-    )
 
 
 def api(auth: Dict, path: str, method="get", headers=None, data=None):
