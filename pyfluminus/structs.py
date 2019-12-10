@@ -97,8 +97,8 @@ class File:
     def get_children(cls, auth: Dict, id: str, allow_upload: bool) -> List[File]:
         directory_children = api(auth, "files/?ParentID={}".format(id))
         directory_files = api(auth, "files/{}/file".format(id))
-        print(directory_children)
-        print(directory_files)
+        # print(directory_children)
+        # print(directory_files)
 
         return [
             cls.parse_child(file_data, allow_upload)
@@ -118,3 +118,18 @@ class File:
             allow_upload=data.get("allowUpload", False),
             multimedia=False,
         )
+
+
+    def get_download_url(self, auth: Dict):
+        if self.multimedia:
+            uri = "multimedia/media/{}".format(self.id)
+            response = api(auth, uri)
+            return response.get('steamUrlPath', None)
+
+        else:
+            uri = "files/file/{}/downloadurl".format(self.id)
+            response = api(auth, uri)
+            return response.get('data', None)
+        
+
+            

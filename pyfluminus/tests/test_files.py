@@ -116,8 +116,13 @@ class TestFiles(unittest.TestCase):
     # - load_children directory
     # - load_children file
     # - load_children already_loaded
-    # - get_download_url
     # - download
 
-    # def test_get_download_url(self):
-    #     File.get_download_ur
+    def test_get_download_url(self):
+        with patch.dict("pyfluminus.api.__dict__", MOCK_CONSTANTS):
+            download_url = sample_file.get_download_url(authorization)
+        self.assertEqual(
+            download_url,
+            "http://localhost:8082/v2/api/files/download/6f3cfb8c-5b91-4d5a-849a-70dcb31eea87",
+        )
+

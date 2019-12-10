@@ -55,6 +55,12 @@ class MockServerRequestHandler(BaseHTTPRequestHandler):
                 query_params == request.get('query', {})
             )
 
+
+        # DEBUGGING
+        # parsed_url = urlparse(self.path)
+        # query_params = dict(parse_qsl(parsed_url.query))
+        # print(self.command, parsed_url.path, query_params)
+
         response = next(fix["response"] for fix in api_fixtures if match(self, fix))
 
         # Add response content.
