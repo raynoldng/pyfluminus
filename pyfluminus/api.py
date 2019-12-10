@@ -32,8 +32,10 @@ class Result:
         self.error_type = error_type
         self.error_msg = error_msg
 
+    @property
     def okay(self):
-        return self.data is not None
+        # not sufficient to use data since can return an empty result 
+        return self.error_type is None
 
 
 class ErrorResult(Result):

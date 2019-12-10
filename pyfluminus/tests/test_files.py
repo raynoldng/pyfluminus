@@ -11,6 +11,7 @@ from pyfluminus.tests.mock_server import (
 )
 from pyfluminus.structs import Module, File
 from pyfluminus import api
+from pyfluminus.constants import ErrorTypes
 
 temp_dir = "test/temp/api/file/"
 id_token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6ImEzck1VZ01Gdjl0UGNsTGE2eUYzekFrZnF1RSIsImtpZCI6ImEzck1VZ01Gdjl0UGNsTGE2eUYzekFrZnF1RSJ9.eyJpc3MiOiJodHRwczovL2x1bWludXMubnVzLmVkdS5zZy92Mi9hdXRoIiwiYXVkIjoidmVyc28iLCJleHAiOjE1NTIwMzQ4ODQsIm5iZiI6MTU1MjAzNDU4NCwibm9uY2UiOiJlYjA0Y2ZmN2U4YTg0YTM0YTlhOWE0YWI3NGU3NzE2NiIsImlhdCI6MTU1MjAzNDU4NCwiYXRfaGFzaCI6Im9RYmFrbkxxeUVPYWtWQV8tMjA2Q1EiLCJjX2hhc2giOiJfMi02T29UYjJJOUpFU2lDZEI2ZGVBIiwic2lkIjoiNTYyZGYxYWYyODRhMDA4MTY1MGE0MDQ4N2NhODAzOTgiLCJzdWIiOiIwMzA4OTI1Mi0wYzk2LTRmYWItYjA4MC1mMmFlYjA3ZWViMGYiLCJhdXRoX3RpbWUiOjE1NTIwMzQ1ODQsImlkcCI6Imlkc3J2IiwiYWRkcmVzcyI6IlJlcXVlc3QgYWxsIGNsYWltcyIsImFtciI6WyJwYXNzd29yZCJdfQ.R54fwml4-KmwaD_pNSJxmf3XXoQdf3coik7-c-Lt7dconpJHLlorsiymQaiGLTlUdvMGHYvN_1JzCi42azkCxF2kjAJiosdCigR3b4okM1sovXoJsbE7tIycx2jpZwCmusL6nMffzE0ly_Q28x55jdQmJ9PIyGe7XD4mfKqDweht4fhCAtoeJtNPeDKX2dG6p4ll0lJxgVBOZsdi8PYF6z_rTt7zmMgd9CSc6WH2sOl8f9FKpVxoGtLBmjEBcNbwODokTu-cgW20vLFc05a7UZa3uKzPZI3DONnUDptLGgatcYGmNDTooQrJdh5xDKrK1tmkgVgBTmvPb44WYIiqHw"
@@ -136,12 +137,18 @@ class TestFiles(unittest.TestCase):
 
     def test_download(self):
         with patch.dict("pyfluminus.api.__dict__", MOCK_CONSTANTS):
-            sample_file.download(authorization, temp_dir)
-        expected_filepath = os.path.join(temp_dir, sample_file.name)
-        self.assertTrue(
-            os.path.exists(expected_filepath),
-            "cannnot find file {}".format(expected_filepath),
-        )
-        with open(expected_filepath, 'r') as f:
-            self.assertEqual("This is just a sample file.\n", "".join(f.readlines()))
+            result1 = sample_file.download(authorization, temp_dir)
+            expected_filepath = os.path.join(temp_dir, sample_file.name)
+            self.assertTrue(result1.okay)
+            self.assertTrue(
+                os.path.exists(expected_filepath),
+                "cannnot find file {}".format(expected_filepath),
+            )
+            with open(expected_filepath, 'r') as f:
+                self.assertEqual("This is just a sample file.\n", "".join(f.readlines()))
+            result2 = sample_file.download(authorization, temp_dir)
+            self.assertFalse(result2.okay)
+            self.assertEquals(result2.error_type, ErrorTypes.FileExists)
+
+        
 

@@ -131,7 +131,7 @@ class File:
             response = api(auth, uri)
             return response.get("data", None)
 
-    def download(self, auth: Dict, path: str, verbose: bool = False) -> None:
+    def download(self, auth: Dict, path: str, verbose: bool = False) -> Result:
         """Downloads file to location specified by `path`
         TODO handle case where file is already there, currently, just do nothing
         """
@@ -139,7 +139,7 @@ class File:
         url = self.get_download_url(auth)
 
         if self.multimedia:
-            utils.download_multimedia(url, destination, verbose)
+            return utils.download_multimedia(url, destination, verbose)
         else:
-            utils.download(url, destination, verbose)
+            return utils.download(url, destination, verbose)
 
