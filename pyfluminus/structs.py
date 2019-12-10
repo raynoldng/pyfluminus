@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import List, Dict
 from pyfluminus import utils
-from pyfluminus.api import api
+from pyfluminus.api import api, Result, ErrorResult
 import os
 
 
@@ -96,7 +96,10 @@ class File:
     @classmethod
     def get_children(cls, auth: Dict, id: str, allow_upload: bool) -> List[File]:
         directory_children = api(auth, "files/?ParentID={}".format(id))
-        directory_files = api(auth, "files/{}/file".format(id))
+        directory_files = api(
+            auth,
+            "files/{}/file{}".format(id, "?populate=Creator" if allow_upload else ""),
+        )
         # print(directory_children)
         # print(directory_files)
 
@@ -111,11 +114,15 @@ class File:
         is_directory = isinstance(data.get("access", None), dict)
         return File(
             id=data["id"],
-            name=data["name"],
+            name=utils.sanitise_filename(
+                "{}{}".format(
+                    data["creatorName"] + " - " if allow_upload else "", data["name"]
+                )
+            ),
             directory=is_directory,
             children=None
             if is_directory
-            else [],  # NOTE cargo culting logic used in fluminus
+            else [],  # NOTE [] indicates that there is no children, None means unknown (lazy)
             allow_upload=data.get("allowUpload", False),
             multimedia=False,
         )
@@ -142,4 +149,13 @@ class File:
             return utils.download_multimedia(url, destination, verbose)
         else:
             return utils.download(url, destination, verbose)
+
+    def load_children(self, auth: Dict) -> Result:
+        # TODO handle get_children returning result
+        if self.directory:
+            children = File.get_children(auth, self.id, allow_upload=self.allow_upload)
+            self.children = children
+        else:
+            self.children = []
+        return Result()
 
