@@ -1,5 +1,6 @@
 import unittest
 from unittest.mock import patch
+import os, shutil
 
 from nose.tools import assert_dict_contains_subset, assert_list_equal, assert_true
 
@@ -11,6 +12,7 @@ from pyfluminus.tests.mock_server import (
 from pyfluminus.structs import Module, File
 from pyfluminus import api
 
+temp_dir = "test/temp/api/file/"
 id_token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6ImEzck1VZ01Gdjl0UGNsTGE2eUYzekFrZnF1RSIsImtpZCI6ImEzck1VZ01Gdjl0UGNsTGE2eUYzekFrZnF1RSJ9.eyJpc3MiOiJodHRwczovL2x1bWludXMubnVzLmVkdS5zZy92Mi9hdXRoIiwiYXVkIjoidmVyc28iLCJleHAiOjE1NTIwMzQ4ODQsIm5iZiI6MTU1MjAzNDU4NCwibm9uY2UiOiJlYjA0Y2ZmN2U4YTg0YTM0YTlhOWE0YWI3NGU3NzE2NiIsImlhdCI6MTU1MjAzNDU4NCwiYXRfaGFzaCI6Im9RYmFrbkxxeUVPYWtWQV8tMjA2Q1EiLCJjX2hhc2giOiJfMi02T29UYjJJOUpFU2lDZEI2ZGVBIiwic2lkIjoiNTYyZGYxYWYyODRhMDA4MTY1MGE0MDQ4N2NhODAzOTgiLCJzdWIiOiIwMzA4OTI1Mi0wYzk2LTRmYWItYjA4MC1mMmFlYjA3ZWViMGYiLCJhdXRoX3RpbWUiOjE1NTIwMzQ1ODQsImlkcCI6Imlkc3J2IiwiYWRkcmVzcyI6IlJlcXVlc3QgYWxsIGNsYWltcyIsImFtciI6WyJwYXNzd29yZCJdfQ.R54fwml4-KmwaD_pNSJxmf3XXoQdf3coik7-c-Lt7dconpJHLlorsiymQaiGLTlUdvMGHYvN_1JzCi42azkCxF2kjAJiosdCigR3b4okM1sovXoJsbE7tIycx2jpZwCmusL6nMffzE0ly_Q28x55jdQmJ9PIyGe7XD4mfKqDweht4fhCAtoeJtNPeDKX2dG6p4ll0lJxgVBOZsdi8PYF6z_rTt7zmMgd9CSc6WH2sOl8f9FKpVxoGtLBmjEBcNbwODokTu-cgW20vLFc05a7UZa3uKzPZI3DONnUDptLGgatcYGmNDTooQrJdh5xDKrK1tmkgVgBTmvPb44WYIiqHw"
 authorization = {"jwt": id_token}
 module = Module(
@@ -58,9 +60,16 @@ class TestFiles(unittest.TestCase):
         # TODO add mock server for auth
         cls.mock_server = start_mock_server(8082)  # for API
 
+        if os.path.exists(temp_dir) and os.path.isdir(temp_dir):
+            print('removed test generated files')
+            shutil.rmtree(temp_dir)
+
     @classmethod
     def tearDownClass(cls):
         cls.mock_server.shutdown()
+        if os.path.exists(temp_dir) and os.path.isdir(temp_dir):
+            print('removed test generated files')
+            shutil.rmtree(temp_dir)
 
     def setUp(self):
         self.addTypeEqualityFunc(File, file_equality)
@@ -93,7 +102,6 @@ class TestFiles(unittest.TestCase):
             allow_upload=False,
             multimedia=False,
         )
-        # import pdb; pdb.set_trace()
         self.assertEqual(expected_file, file)
 
     def test_file_from_module_filename_sanitised(self):
@@ -125,4 +133,15 @@ class TestFiles(unittest.TestCase):
             download_url,
             "http://localhost:8082/v2/api/files/download/6f3cfb8c-5b91-4d5a-849a-70dcb31eea87",
         )
+
+    def test_download(self):
+        with patch.dict("pyfluminus.api.__dict__", MOCK_CONSTANTS):
+            sample_file.download(authorization, temp_dir)
+        expected_filepath = os.path.join(temp_dir, sample_file.name)
+        self.assertTrue(
+            os.path.exists(expected_filepath),
+            "cannnot find file {}".format(expected_filepath),
+        )
+        with open(expected_filepath, 'r') as f:
+            self.assertEqual("This is just a sample file.\n", "".join(f.readlines()))
 

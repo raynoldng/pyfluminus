@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import List, Dict
 from pyfluminus import utils
 from pyfluminus.api import api
-
+import os
 
 class Module:
     def __init__(self, id: str, code: str, name: str, teaching: bool, term: str):
@@ -81,7 +81,6 @@ class File:
     def __str__(self):
         return f"id: {self.id}, name: {self.name}, directory: {self.directory}, children: {self.children}, allow_upload: {self.allow_upload}, multimedia: {self.multimedia}"
 
-
     @classmethod
     def from_module(cls, auth: Dict, module: Module) -> File:
         return File(
@@ -105,7 +104,6 @@ class File:
             for file_data in directory_children["data"] + directory_files["data"]
         ]
 
-
     @classmethod
     def parse_child(cls, data: Dict, allow_upload: bool) -> File:
         # TODO handle add creator name
@@ -114,22 +112,37 @@ class File:
             id=data["id"],
             name=data["name"],
             directory=is_directory,
-            children=None if is_directory else [], # NOTE cargo culting logic used in fluminus
+            children=None
+            if is_directory
+            else [],  # NOTE cargo culting logic used in fluminus
             allow_upload=data.get("allowUpload", False),
             multimedia=False,
         )
-
 
     def get_download_url(self, auth: Dict):
         if self.multimedia:
             uri = "multimedia/media/{}".format(self.id)
             response = api(auth, uri)
-            return response.get('steamUrlPath', None)
+            return response.get("steamUrlPath", None)
 
         else:
             uri = "files/file/{}/downloadurl".format(self.id)
             response = api(auth, uri)
-            return response.get('data', None)
-        
+            return response.get("data", None)
 
-            
+    def download(self, auth: Dict, path: str, verbose: bool=False) -> None:
+        """Downloads file to location specified by `path`
+        TODO handle case where file is already there, currently, just do nothing
+        """
+        destination = os.path.join(path, self.name)
+        url = self.get_download_url(auth)
+
+        if self.multimedia:
+            utils.download_multimedia(url, destination, verbose)
+        else:
+            utils.download(url, destination, verbose)
+
+
+
+
+
