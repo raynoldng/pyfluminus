@@ -3,6 +3,7 @@ from pyfluminus.constants import OCP_SUBSCRIPTION_KEY, API_BASE_URL
 
 # from pyfluminus.structs import Module
 from pyfluminus import utils
+from pyfluminus.constants import ErrorTypes
 
 import requests
 import urllib.parse as parse
@@ -23,34 +24,54 @@ teaching_perms = [
 ]
 
 
-def name(auth: Dict) -> str:
+class Result:
+    """contains the response from API calls"""
+
+    def __init__(self, data=None, error_type=None, error_msg=None):
+        self.data = data
+        self.error_type = error_type
+        self.error_msg = error_msg
+
+    def okay(self):
+        return self.data is not None
+
+
+class ErrorResult(Result):
+    """convenience wrapper for initializing Error results"""
+
+    def __init__(self, error_type=None, error_msg=None):
+        super().__init__(data=None, error_type=error_type, error_msg=error_msg)
+
+
+def name(auth: Dict) -> Result:
     response = api(auth, "user/Profile")
     if "userNameOriginal" in response:
-        return response["userNameOriginal"].title()
-    return None
+        name = response["userNameOriginal"].title()
+        return Result(data=name)
+    return ErrorResult(error_type=ErrorTypes.Error)
 
 
-def current_term(auth: Dict) -> Dict:
+def current_term(auth: Dict) -> Result:
     """returns info about current term
     e.g.: {term: "1820", description: "2018/2019 Semester 2"}
     """
     response = api(auth, "/setting/AcademicWeek/current?populate=termDetail")
     if "termDetail" in response:
-        return {
+        return Result({
             "term": response["termDetail"]["term"],
             "description": response["termDetail"]["description"],
-        }
-    return {"error": {"unexpected_response": response}}
+        })
+    return ErrorResult(ErrorTypes.UnexpectedResponse, response)
 
 
-def modules(auth: Dict, current_term_only: bool = False) -> List[Module]:
+def modules(auth: Dict, current_term_only: bool = False) -> Result:
     """ returns list of modules that user with given authorization is reading
     """
     from pyfluminus.structs import Module
 
     response = api(auth, "module")
     if "data" in response:
-        return [
+        return Result([
             Module(
                 id=mod["id"],
                 code=mod["name"],
@@ -59,8 +80,8 @@ def modules(auth: Dict, current_term_only: bool = False) -> List[Module]:
                 term=mod["term"],
             )
             for mod in response["data"]
-        ]
-    return {"error": {"unexpected_response": response}}
+        ])
+    return ErrorResult(ErrorTypes.UnexpectedResponse, response)
 
 
 def api(auth: Dict, path: str, method="get", headers=None, data=None):

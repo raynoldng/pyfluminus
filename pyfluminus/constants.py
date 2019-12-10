@@ -5,3 +5,13 @@ RESOURCE = "sg_edu_nus_oauth"
 
 OCP_SUBSCRIPTION_KEY = "6963c200ca9440de8fa1eede730d8f7e"
 API_BASE_URL = "https://luminus.nus.edu.sg/v2/api/"
+
+from enum import Enum, auto
+
+
+class ErrorTypes(Enum):
+    Error = auto()
+    UnexpectedResponse = auto()
+    NodeCodeInQuery = auto()
+    FileExists = auto()
+    InvalidCredentials = auto()

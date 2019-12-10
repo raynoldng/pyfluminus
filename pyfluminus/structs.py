@@ -4,6 +4,7 @@ from pyfluminus import utils
 from pyfluminus.api import api
 import os
 
+
 class Module:
     def __init__(self, id: str, code: str, name: str, teaching: bool, term: str):
         """
@@ -130,7 +131,7 @@ class File:
             response = api(auth, uri)
             return response.get("data", None)
 
-    def download(self, auth: Dict, path: str, verbose: bool=False) -> None:
+    def download(self, auth: Dict, path: str, verbose: bool = False) -> None:
         """Downloads file to location specified by `path`
         TODO handle case where file is already there, currently, just do nothing
         """
@@ -141,8 +142,4 @@ class File:
             utils.download_multimedia(url, destination, verbose)
         else:
             utils.download(url, destination, verbose)
-
-
-
-
 

@@ -23,14 +23,18 @@ class TestAPI(unittest.TestCase):
 
     def test_get_profile(self):
         with patch.dict("pyfluminus.api.__dict__", MOCK_CONSTANTS):
-            self.assertEqual(api.name(authorization), "John Smith")
+            result = api.name(authorization)
+            self.assertTrue(result.okay)
+            self.assertEqual(result.data, "John Smith")
 
     def test_get_current_term(self):
         with patch.dict("pyfluminus.api.__dict__", MOCK_CONSTANTS):
-            self.assertDictEqual(
-                api.current_term(authorization),
-                {"term": "1820", "description": "2018/2019 Semester 2"},
-            )
+            result = api.current_term(authorization)
+        self.assertTrue(result.okay)
+        self.assertDictEqual(
+            result.data,
+            {"term": "1820", "description": "2018/2019 Semester 2"},
+        )
 
     def test_get_modules(self):
         expected_modules = [
@@ -73,12 +77,14 @@ class TestAPI(unittest.TestCase):
         with patch.dict("pyfluminus.api.__dict__", MOCK_CONSTANTS):
             result = api.modules(authorization)
 
-            result.sort(key=lambda mod: mod.id)
-            expected_modules.sort(key=lambda mod: mod.id)
+        self.assertTrue(result.okay)
+        modules = result.data
+        modules.sort(key=lambda mod: mod.id)
+        expected_modules.sort(key=lambda mod: mod.id)
 
-            self.assertEqual(len(result), len(expected_modules))
-            for mod1, mod2 in zip(result, expected_modules):
-                self.assertEqual(mod1, mod2)
+        self.assertEqual(len(modules), len(expected_modules))
+        for mod1, mod2 in zip(modules, expected_modules):
+            self.assertEqual(mod1, mod2)
 
     def get_current_term_modules(self):
         expected_modules = [
@@ -100,9 +106,11 @@ class TestAPI(unittest.TestCase):
         with patch.dict("pyfluminus.api.__dict__", MOCK_CONSTANTS):
             result = api.modules(authorization, current_term_only=True)
 
-            result.sort(key=lambda mod: mod.id)
-            expected_modules.sort(key=lambda mod: mod.id)
 
-            self.assertEqual(len(result), len(expected_modules))
-            for mod1, mod2 in zip(result, expected_modules):
-                self.assertEqual(mod1, mod2)
+        modules = result.data
+        modules.sort(key=lambda mod: mod.id)
+        expected_modules.sort(key=lambda mod: mod.id)
+
+        self.assertEqual(len(modules), len(expected_modules))
+        for mod1, mod2 in zip(modules, expected_modules):
+            self.assertEqual(mod1, mod2)
