@@ -87,21 +87,6 @@ def get_lessons(auth: Dict, module_id: str) -> Result:
 
 
 def get_files_from_lesson(auth: Dict, lesson: Lesson) -> Result:
-    """
-  def files(%__MODULE__{id: id, module_id: module_id}, auth = %Authorization{}) do
-    uri = "/lessonplan/Activity/?populate=TargetAncestor&ModuleID=#{module_id}&LessonID=#{id}"
-
-    case API.api(auth, uri) do
-      {:ok, %{"data" => data}} when is_list(data) ->
-        {:ok, data |> Enum.map(&File.from_lesson/1) |> Enum.filter(&(&1 != nil))}
-
-      {:ok, response} ->
-        {:error, {:unexpected_response, response}}
-
-      {:error, error} ->
-        {:error, error}
-    end
-    """
     from pyfluminus.structs import File
 
     uri = "/lessonplan/Activity/?populate=TargetAncestor&ModuleID={}&LessonID={}".format(
@@ -113,6 +98,22 @@ def get_files_from_lesson(auth: Dict, lesson: Lesson) -> Result:
         return Result([f for f in files if f is not None])
     return ErrorResult(ErrorTypes.Error)
 
+
+def get_weblectures(auth: Dict, module_id: str) -> Result:
+    from pyfluminus.structs import Weblecture
+    uri_parent = "weblecture/?ParentID={}".format(module_id)
+    parent_result = api(auth, uri_parent)
+    if "error" in parent_result:
+        return ErrorResult()
+    uri_children = "weblecture/{}/sessions/?sortby=createdDate".format(
+        parent_result["id"]
+    )
+    children_result = api(auth, uri_children)
+    if not "data" in children_result:
+        return ErrorResult()
+    return Result(
+        [Weblecture.from_api(item, module_id) for item in children_result['data']]
+    ) if isinstance(children_result['data'], list) else ErrorResult()
 
 def api(auth: Dict, path: str, method="get", headers=None, data=None):
     if headers is None:

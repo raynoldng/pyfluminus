@@ -69,25 +69,20 @@ class Module:
             return result.data
         return None
 
-    def lessons(self):
-        """
-        uri = "/lessonplan/Lesson/?ModuleID=#{id}"
+    def lessons(self, auth: Dict) -> List[Lesson]:
+        result = api.get_lessons(auth, self.id)
+        if result.okay:
+            return result.data
+        else:
+            return None
 
-        case API.api(auth, uri) do
-        {:ok, %{"data" => data}} when is_list(data) ->
-            {:ok, Enum.map(data, &Lesson.from_api(&1, module))}
-
-        {:ok, response} ->
-            {:error, {:unexpected_response, response}}
-
-        {:error, error} ->
-            {:error, error}
-        end
-        """
-        pass
-
-    def weblectures(self):
-        pass
+    def weblectures(self, auth: Dict) -> List[Weblecture]:
+        """Get all weblectures for this mod"""
+        result = api.get_lessons(auth, self.id)
+        if result.okay:
+            return result.data
+        else:
+            return None
 
 
 class Lesson:
@@ -264,7 +259,7 @@ class File:
 
     def download(self, auth: Dict, path: str, verbose: bool = False) -> Result:
         """Downloads file to location specified by `path`
-        TODO handle case where file is already there, currently, just do nothing
+        returns empty Result if successful, else returns ErrorResult(FileExists)
         """
         destination = os.path.join(path, self.name)
         url = self.get_download_url(auth)
@@ -283,3 +278,37 @@ class File:
             self.children = []
         return Result()
 
+
+class Weblecture:
+    """
+    Provides an abstraction over a weblecture in LumiNUS, and operations possible on them using
+    LumiNUS API.
+
+    Struct fields:
+    * `:id` - id of the weblecture
+    * `:name` - name of the weblecture
+    * `:module_id` - the module_id to which the weblecture is from.
+    """
+
+    def __init__(self, id: str, name: str, module_id: str):
+        self.id = id
+        self.name = name
+        self.module_id = module_id
+
+    def __eq__(self, other):
+        return (
+            self.id == other.id
+            and self.name == other.name
+            and self.module_id == other.module_id
+        )
+
+    @classmethod
+    def from_api(cls, api_data: Dict, module_id: str) -> Weblecture:
+        return Weblecture(id=api_data["id"], name=api_data["name"], module_id=module_id)
+
+    def get_download_url(self, auth: Dict) -> str:
+        """obtains download url for given weblecture"""
+        pass
+
+    def do_get_download_url(self, launch_url: str, data_items: Dict) -> str:
+        pass

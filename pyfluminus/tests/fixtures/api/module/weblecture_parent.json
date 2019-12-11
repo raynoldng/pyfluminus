@@ -1,0 +1,14 @@
+{
+    "request": {
+        "method": "GET",
+        "request_path": "/weblecture/",
+        "query": {
+            "ParentID": "9db79e1f-4b15-4fe9-8783-363990eeff09"
+        }
+    },
+    "response": {
+        "body": "{\"id\": \"d32b149a-c5db-4f1e-afdc-989cc946d7b6\", \"name\": \"CS4261/CS5461\", \"startDate\": \"2019-07-04T17:38:04.67+08:00\", \"endDate\": \"2019-12-21T23:59:00+08:00\", \"publish\": true, \"createdDate\": \"2019-07-05T11:21:56.23+08:00\", \"lastUpdatedDate\": \"2019-08-26T08:42:21.25+08:00\", \"lastUpdatedBy\": \"03089252-0c96-4fab-b080-f2aeb07eeb0f\", \"parentID\": \"9db79e1f-4b15-4fe9-8783-363990eeff09\", \"rootID\": \"9db79e1f-4b15-4fe9-8783-363990eeff09\", \"creatorID\": \"68fd6c06-24b0-4c63-85f7-9a69384345ee\", \"description\": \"Web Lectures for CS4251/CS5461\", \"allowDownload\": true, \"venue\": \"LT15\", \"isOpen\": false, \"isAutoPublish\": true, \"panoptoFolderURL\": \"https://nuscast.ap.panopto.com/Panopto/Pages/Sessions/List.aspx#folderID=96685b61-d370-48ec-b72f-aa8100377740\", \"panoptoStatisticsURL\": \"https://nuscast.ap.panopto.com/Panopto/Pages/Analytics.aspx?embedded=1#folderId=96685b61-d370-48ec-b72f-aa8100377740\"}",
+        "headers": [],
+        "status_code": 200
+    }
+}
