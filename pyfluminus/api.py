@@ -1,9 +1,7 @@
 from __future__ import annotations
-from pyfluminus.constants import OCP_SUBSCRIPTION_KEY, API_BASE_URL
-
-# from pyfluminus.structs import Module
+from pyfluminus.constants import OCP_SUBSCRIPTION_KEY, API_BASE_URL, ErrorTypes
 from pyfluminus import utils
-from pyfluminus.constants import ErrorTypes
+from pyfluminus.api_structs import Result, ErrorResult
 
 import requests
 import urllib.parse as parse
@@ -14,27 +12,6 @@ from typing import Dict, List, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from pyfluminus.structs import Module, File
-
-
-class Result:
-    """contains the response from API calls"""
-
-    def __init__(self, data=None, error_type=None, error_msg=None):
-        self.data = data
-        self.error_type = error_type
-        self.error_msg = error_msg
-
-    @property
-    def okay(self):
-        # not sufficient to use data since can return an empty result
-        return self.error_type is None
-
-
-class ErrorResult(Result):
-    """convenience wrapper for initializing Error results"""
-
-    def __init__(self, error_type=ErrorTypes.Error, error_msg=None):
-        super().__init__(data=None, error_type=error_type, error_msg=error_msg)
 
 
 def name(auth: Dict) -> Result:
@@ -91,6 +68,11 @@ def get_announcements(auth: Dict, module_id: str, archive: bool) -> Result:
         return Result(result_data)
     return ErrorResult(ErrorTypes.Error)
 
+def get_lessons(auth: Dict, module_id: str) -> Result:
+    # TODO should return list of Lesson in Result, for now just return the raw response
+    uri = "/lessonplan/Lesson/?ModuleID={}".format(module_id)
+    return api(auth, uri)
+    
 
 def api(auth: Dict, path: str, method="get", headers=None, data=None):
     if headers is None:

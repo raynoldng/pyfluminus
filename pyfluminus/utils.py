@@ -6,7 +6,7 @@ import requests
 import sys, os
 from bs4 import BeautifulSoup
 
-from pyfluminus.api import Result, ErrorResult
+from pyfluminus.api_structs import Result, ErrorResult
 from pyfluminus.constants import ErrorTypes
 
 

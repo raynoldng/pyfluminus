@@ -1,7 +1,8 @@
 from __future__ import annotations
 from typing import List, Dict, Optional
-from pyfluminus import utils, api
-from pyfluminus.api import Result, ErrorResult
+from pyfluminus import utils
+from pyfluminus import api
+from pyfluminus.api_structs import Result, ErrorResult
 import os
 
 
@@ -69,7 +70,24 @@ class Module:
         return None
 
     def lessons(self):
+        """
+        uri = "/lessonplan/Lesson/?ModuleID=#{id}"
+
+        case API.api(auth, uri) do
+        {:ok, %{"data" => data}} when is_list(data) ->
+            {:ok, Enum.map(data, &Lesson.from_api(&1, module))}
+
+        {:ok, response} ->
+            {:error, {:unexpected_response, response}}
+
+        {:error, error} ->
+            {:error, error}
+        end
+        """
         pass
+
+
+
 
     def weblectures(self):
         pass
@@ -155,8 +173,8 @@ class File:
 
     @classmethod
     def get_children(cls, auth: Dict, id: str, allow_upload: bool) -> List[File]:
-        directory_children = api(auth, "files/?ParentID={}".format(id))
-        directory_files = api(
+        directory_children = api.api(auth, "files/?ParentID={}".format(id))
+        directory_files = api.api(
             auth,
             "files/{}/file{}".format(id, "?populate=Creator" if allow_upload else ""),
         )
@@ -190,12 +208,12 @@ class File:
     def get_download_url(self, auth: Dict):
         if self.multimedia:
             uri = "multimedia/media/{}".format(self.id)
-            response = api(auth, uri)
+            response = api.api(auth, uri)
             return response.get("steamUrlPath", None)
 
         else:
             uri = "files/file/{}/downloadurl".format(self.id)
-            response = api(auth, uri)
+            response = api.api(auth, uri)
             return response.get("data", None)
 
     def download(self, auth: Dict, path: str, verbose: bool = False) -> Result:
