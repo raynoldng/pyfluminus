@@ -33,28 +33,6 @@ sample_file = File(
 )
 
 
-def file_equality(f1, f2, msg=None):
-    assert (
-        f1.id == f2.id
-        and f1.name == f2.name
-        and f1.directory == f2.directory
-        and f1.allow_upload == f2.allow_upload
-        and f1.multimedia == f2.multimedia
-    ), "file attributes differ"
-
-    if f1.children is None or f2.children is None:
-        return True
-    if len(f1.children) == len(f2.children) == 0:
-        return True
-
-    assert len(f1.children) == len(f2.children) and all(
-        file_equality(f1_child, f2_child)
-        for f1_child, f2_child in zip(f1.children, f2.children)
-    ), "file children differ"
-
-    return True
-
-
 class TestFiles(unittest.TestCase):
     @classmethod
     def setup_class(cls):
@@ -71,9 +49,6 @@ class TestFiles(unittest.TestCase):
         if os.path.exists(temp_dir) and os.path.isdir(temp_dir):
             print("removed test generated files")
             shutil.rmtree(temp_dir)
-
-    def setUp(self):
-        self.addTypeEqualityFunc(File, file_equality)
 
     def test_files_from_module(self):
         with patch.dict("pyfluminus.api.__dict__", MOCK_CONSTANTS):
@@ -262,12 +237,11 @@ class TestFiles(unittest.TestCase):
         )
         with patch.dict("pyfluminus.api.__dict__", MOCK_CONSTANTS):
             result = file.load_children(authorization)
-        
+
         self.assertTrue(result.okay)
         self.assertEqual(len(expected_children), len(file.children))
         for child1, child2 in zip(expected_children, file.children):
             self.assertEqual(child1, child2, "{}\n{}".format(child1, child2))
-
 
     def test_load_children_directory(self):
         file = File(

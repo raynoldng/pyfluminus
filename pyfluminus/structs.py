@@ -113,7 +113,7 @@ class Lesson:
             id=api_data["id"],
             name=api_data["name"],
             week=int(api_data["navigationLabel"]),
-            module_id=module_id
+            module_id=module_id,
         )
 
     def files(self):
@@ -161,6 +161,31 @@ class File:
 
     def __str__(self):
         return f"id: {self.id}, name: {self.name}, directory: {self.directory}, children: {self.children}, allow_upload: {self.allow_upload}, multimedia: {self.multimedia}"
+
+    @classmethod
+    def __eq(cls, f1, f2):
+        if (
+            f1.id == f2.id
+            and f1.name == f2.name
+            and f1.directory == f2.directory
+            and f1.allow_upload == f2.allow_upload
+            and f1.multimedia == f2.multimedia
+        ):
+
+            if f1.children is None or f2.children is None:
+                return True
+            if len(f1.children) == len(f2.children) == 0:
+                return True
+
+            if len(f1.children) == len(f2.children) and all(
+                File.__eq(f1_child, f2_child)
+                for f1_child, f2_child in zip(f1.children, f2.children)
+            ):
+                return True
+        return False
+
+    def __eq__(self, other):
+        return File.__eq(self, other)
 
     @classmethod
     def from_module(cls, auth: Dict, module: Module) -> File:
