@@ -55,24 +55,32 @@ def get_announcements(auth: Dict, module_id: str, archive: bool) -> Result:
     )
     response = api(auth, uri)
     if "data" in response:
-        announcements = response['data']
+        announcements = response["data"]
         result_data = []
-        for announcement in response['data']:
+        for announcement in response["data"]:
             if not all(key in announcement for key in fields):
                 return ErrorResult(ErrorTypes.UnexpectedResponse, response)
-            result_data.append({
-                'title': announcement['title'],
-                'description': utils.remove_html_tags(announcement['description']),
-                'datetime': date_parse(announcement['displayFrom'])
-            })
+            result_data.append(
+                {
+                    "title": announcement["title"],
+                    "description": utils.remove_html_tags(announcement["description"]),
+                    "datetime": date_parse(announcement["displayFrom"]),
+                }
+            )
         return Result(result_data)
     return ErrorResult(ErrorTypes.Error)
 
+
 def get_lessons(auth: Dict, module_id: str) -> Result:
-    # TODO should return list of Lesson in Result, for now just return the raw response
+    from pyfluminus.structs import Lesson
     uri = "/lessonplan/Lesson/?ModuleID={}".format(module_id)
-    return api(auth, uri)
-    
+    response = api(auth, uri)
+    if "data" in response:
+        return Result(
+            [Lesson.from_api(lesson_data, module_id) for lesson_data in response["data"]]
+        )
+    return ErrorResult(ErrorTypes.Error)
+
 
 def api(auth: Dict, path: str, method="get", headers=None, data=None):
     if headers is None:

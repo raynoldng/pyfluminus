@@ -86,9 +86,6 @@ class Module:
         """
         pass
 
-
-
-
     def weblectures(self):
         pass
 
@@ -111,20 +108,25 @@ class Lesson:
         self.module_id = module_id
 
     @classmethod
-    def from_api(cls, result: result, module: Module):
-        assert result.ok and all(
-            key in result.data for key in ["id", "name", "navigationLabel"]
-        )
-        data = result.data
+    def from_api(cls, api_data: Dict, module_id: str):
         return Lesson(
-            id=data["id"],
-            name=data["name"],
-            week=data["navigationLabel"],
-            module_id=module.id,
+            id=api_data["id"],
+            name=api_data["name"],
+            week=int(api_data["navigationLabel"]),
+            module_id=module_id
         )
 
     def files(self):
+        # TODO implement me
         """get files associated with that lesson plan"""
+
+    def __eq__(self, other):
+        return (
+            self.id == other.id
+            and self.name == other.name
+            and self.week == other.week
+            and self.module_id == other.module_id
+        )
 
 
 class File:
