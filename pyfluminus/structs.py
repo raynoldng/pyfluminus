@@ -6,6 +6,16 @@ import os
 
 
 class Module:
+
+    teaching_perms = [
+        "access_Full",
+        "access_Create",
+        "access_Update",
+        "access_Delete",
+        "access_Settings_Read",
+        "access_Settings_Update",
+    ]
+
     def __init__(self, id: str, code: str, name: str, teaching: bool, term: str):
         """
         * `:id` - id of the module in the LumiNUS API
@@ -29,6 +39,57 @@ class Module:
             and self.teaching == other.teaching
             and self.term == other.term
         )
+
+    @classmethod
+    def from_api(cls, api_data: Dict):
+        """
+        expect api_data to have the following fields: id, name, courseName, (access)
+        """
+        return Module(
+            id=api_data["id"],
+            code=api_data["name"],
+            name=api_data["courseName"],
+            teaching=any(
+                api_data["access"].get(perm, False) for perm in cls.teaching_perms
+            ),
+            term=api_data["term"],
+        )
+
+    def announcements(self):
+        """  Returns a list of announcements for a given module.
+        The LumiNUS API provides 2 separate endpoints for archived and non-archived announcements. By default,
+        announcements are archived after roughly 16 weeks (hence, the end of the
+        semester) so most of the times, we should never need to access archived announcements.
+        """
+        """
+    case API.api(auth, uri) do
+      {:ok, %{"data" => data}} ->
+        {:ok,
+         Enum.map(data, fn %{"title" => title, "description" => description, "displayFrom" => datetime} ->
+           datetime =
+             case DateTime.from_iso8601(datetime) do
+               {:ok, datetime, _} -> datetime
+               {:error, _} -> nil
+             end
+
+           %{title: title, description: HtmlSanitizeEx.strip_tags(description), datetime: datetime}
+         end)}
+
+      {:ok, response} ->
+        {:error, {:unexpected_response, response}}
+
+      {:error, error} ->
+        {:error, error}
+    end
+        """
+
+        pass
+
+    def lessons(self):
+        pass
+
+    def weblectures(self):
+        pass
 
 
 class Lesson:

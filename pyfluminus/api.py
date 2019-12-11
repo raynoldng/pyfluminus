@@ -14,15 +14,6 @@ from typing import Dict, List, TYPE_CHECKING
 if TYPE_CHECKING:
     from pyfluminus.structs import Module, File
 
-teaching_perms = [
-    "access_Full",
-    "access_Create",
-    "access_Update",
-    "access_Delete",
-    "access_Settings_Read",
-    "access_Settings_Update",
-]
-
 
 class Result:
     """contains the response from API calls"""
@@ -34,7 +25,7 @@ class Result:
 
     @property
     def okay(self):
-        # not sufficient to use data since can return an empty result 
+        # not sufficient to use data since can return an empty result
         return self.error_type is None
 
 
@@ -59,10 +50,12 @@ def current_term(auth: Dict) -> Result:
     """
     response = api(auth, "/setting/AcademicWeek/current?populate=termDetail")
     if "termDetail" in response:
-        return Result({
-            "term": response["termDetail"]["term"],
-            "description": response["termDetail"]["description"],
-        })
+        return Result(
+            {
+                "term": response["termDetail"]["term"],
+                "description": response["termDetail"]["description"],
+            }
+        )
     return ErrorResult(ErrorTypes.UnexpectedResponse, response)
 
 
@@ -73,17 +66,21 @@ def modules(auth: Dict, current_term_only: bool = False) -> Result:
 
     response = api(auth, "module")
     if "data" in response:
-        return Result([
-            Module(
-                id=mod["id"],
-                code=mod["name"],
-                name=mod["courseName"],
-                teaching=any(mod["access"].get(perm, False) for perm in teaching_perms),
-                term=mod["term"],
-            )
-            for mod in response["data"]
-        ])
+        return Result([Module.from_api(mod_data) for mod_data in response["data"]])
     return ErrorResult(ErrorTypes.UnexpectedResponse, response)
+
+
+def get_annoucements(auth: Dict, module_id: str, archive: bool) -> Result:
+    fields = ["title", "description", "displayFrom"]
+    uri = "/announcement/{}/{}?sortby=displayFrom%20ASC".format(
+        "Archived" if archive else "NonArchived", module_id
+    )
+    response = api(auth, uri)
+    if "data" in response:
+        if not all(key in response["data"] for key in fields):
+            return ErrorResult(ErrorTypes.UnexpectedResponse, response)
+        return Result({field: response["data"][field] for field in fields})
+    return ErrorResult(ErrorTypes.Error)
 
 
 def api(auth: Dict, path: str, method="get", headers=None, data=None):
