@@ -1,0 +1,16 @@
+{
+    "request": {
+        "method": "GET",
+        "request_path": "/lessonplan/Activity/",
+        "query": {
+            "populate": "TargetAncestor",
+            "ModuleID": "9db79e1f-4b15-4fe9-8783-363990eeff09",
+            "LessonID": "e344491c-dc7a-493b-88f3-db9157e2853b"
+        }
+    },
+    "response": {
+        "body": "{\"status\": \"success\", \"code\": 200, \"total\": 2, \"offset\": 0, \"data\": [{\"id\": \"ad9cbc25-0d4f-4ba9-a1d8-dfeb78c0cfa3\", \"name\": \"Lesson 6 - CS4261 - The Bargaining Solution.pdf\", \"resourceID\": \"9db79e1f-4b15-4fe9-8783-363990eeff09\", \"parentID\": \"e344491c-dc7a-493b-88f3-db9157e2853b\", \"createdDate\": \"2019-09-19T13:16:25.49+08:00\", \"creatorID\": \"68fd6c06-24b0-4c63-85f7-9a69384345ee\", \"description\": \"\", \"targetID\": \"e2a3bfa1-78d2-400b-ac74-c09636131b6f\", \"eventTypeID\": 24, \"publish\": true, \"targetAncestor\": [{\"id\": \"e2a3bfa1-78d2-400b-ac74-c09636131b6f\", \"name\": \"Lesson 6 - CS4261 - The Bargaining Solution.pdf\", \"typeID\": 24, \"typeName\": \"File\", \"isResourceType\": false}, {\"id\": \"dea4c497-ccda-4aef-a695-ea04ab88c1d6\", \"name\": \"Lecture Slides\", \"typeID\": 2, \"typeName\": \"Folder\", \"isResourceType\": true}, {\"id\": \"9db79e1f-4b15-4fe9-8783-363990eeff09\", \"name\": \"CS4261/CS5461\", \"typeID\": 1, \"typeName\": \"Module\", \"isResourceType\": true}], \"target\": {\"createdDate\": \"2019-09-19T13:15:07.927+08:00\", \"creatorID\": \"68fd6c06-24b0-4c63-85f7-9a69384345ee\", \"lastUpdatedDate\": \"2019-09-19T13:15:07.927+08:00\", \"lastUpdatedBy\": \"68fd6c06-24b0-4c63-85f7-9a69384345ee\", \"publish\": true, \"publishForLF\": true, \"notVisibleDueToParentSetting\": false, \"hasEditAccess\": false, \"id\": \"e2a3bfa1-78d2-400b-ac74-c09636131b6f\", \"name\": \"Lesson 6 - CS4261 - The Bargaining Solution.pdf\", \"typeID\": 24, \"typeName\": \"File\", \"isResourceType\": false}}, {\"id\": \"beb367c8-1b18-4ebb-bd29-818a6c5c0ae7\", \"name\": \"Nash Bargaining\", \"resourceID\": \"9db79e1f-4b15-4fe9-8783-363990eeff09\", \"parentID\": \"e344491c-dc7a-493b-88f3-db9157e2853b\", \"createdDate\": \"2019-07-05T10:59:23.873+08:00\", \"creatorID\": \"68fd6c06-24b0-4c63-85f7-9a69384345ee\", \"description\": \"We will explore an alternative model of strategic bargaining: the Nash bargaining solution\", \"startDate\": \"2019-10-25T14:00:00+08:00\", \"endDate\": \"2019-10-25T16:00:00+08:00\", \"location\": \"LT15\", \"eventTypeID\": 1001, \"publish\": true, \"targetAncestor\": null, \"target\": null}]}",
+        "headers": [],
+        "status_code": 200
+    }
+}

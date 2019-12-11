@@ -199,6 +199,25 @@ class File:
         )
 
     @classmethod
+    def from_lesson(cls, api_data) -> Optional[File]:
+        if api_data.get("target", None) is None or api_data["target"].get(
+            "isResourceType", True
+        ):
+            return None
+
+        target = api_data["target"]
+        multimedia = "duration" in target
+        return File(
+            id=target["id"],
+            name=utils.sanitise_filename(target["name"])
+            + (".mp4" if multimedia else ""),
+            children=[],
+            allow_upload=False,
+            multimedia=multimedia,
+            directory=False,
+        )
+
+    @classmethod
     def get_children(cls, auth: Dict, id: str, allow_upload: bool) -> List[File]:
         directory_children = api.api(auth, "files/?ParentID={}".format(id))
         directory_files = api.api(

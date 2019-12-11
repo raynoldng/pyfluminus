@@ -11,7 +11,7 @@ from dateutil.parser import parse as date_parse
 from typing import Dict, List, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from pyfluminus.structs import Module, File
+    from pyfluminus.structs import Module, File, Lesson
 
 
 def name(auth: Dict) -> Result:
@@ -73,12 +73,44 @@ def get_announcements(auth: Dict, module_id: str, archive: bool) -> Result:
 
 def get_lessons(auth: Dict, module_id: str) -> Result:
     from pyfluminus.structs import Lesson
+
     uri = "/lessonplan/Lesson/?ModuleID={}".format(module_id)
     response = api(auth, uri)
     if "data" in response:
         return Result(
-            [Lesson.from_api(lesson_data, module_id) for lesson_data in response["data"]]
+            [
+                Lesson.from_api(lesson_data, module_id)
+                for lesson_data in response["data"]
+            ]
         )
+    return ErrorResult(ErrorTypes.Error)
+
+
+def get_files_from_lesson(auth: Dict, lesson: Lesson) -> Result:
+    """
+  def files(%__MODULE__{id: id, module_id: module_id}, auth = %Authorization{}) do
+    uri = "/lessonplan/Activity/?populate=TargetAncestor&ModuleID=#{module_id}&LessonID=#{id}"
+
+    case API.api(auth, uri) do
+      {:ok, %{"data" => data}} when is_list(data) ->
+        {:ok, data |> Enum.map(&File.from_lesson/1) |> Enum.filter(&(&1 != nil))}
+
+      {:ok, response} ->
+        {:error, {:unexpected_response, response}}
+
+      {:error, error} ->
+        {:error, error}
+    end
+    """
+    from pyfluminus.structs import File
+
+    uri = "/lessonplan/Activity/?populate=TargetAncestor&ModuleID={}&LessonID={}".format(
+        lesson.module_id, lesson.id
+    )
+    response = api(auth, uri)
+    if "data" in response:
+        files = [File.from_lesson(file_data) for file_data in response["data"]]
+        return Result([f for f in files if f is not None])
     return ErrorResult(ErrorTypes.Error)
 
 
