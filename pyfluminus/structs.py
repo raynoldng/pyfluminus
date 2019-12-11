@@ -1,7 +1,7 @@
 from __future__ import annotations
-from typing import List, Dict
-from pyfluminus import utils
-from pyfluminus.api import api, Result, ErrorResult
+from typing import List, Dict, Optional
+from pyfluminus import utils, api
+from pyfluminus.api import Result, ErrorResult
 import os
 
 
@@ -41,10 +41,12 @@ class Module:
         )
 
     @classmethod
-    def from_api(cls, api_data: Dict):
+    def from_api(cls, api_data: Dict) -> Optional[Module]:
         """
         expect api_data to have the following fields: id, name, courseName, (access)
         """
+        if not all(field in api_data for field in ["id", "name", "courseName"]):
+            return None
         return Module(
             id=api_data["id"],
             code=api_data["name"],
@@ -55,35 +57,16 @@ class Module:
             term=api_data["term"],
         )
 
-    def announcements(self):
+    def announcements(self, auth: Dict, archived=False) -> Optional[List[Dict]]:
         """  Returns a list of announcements for a given module.
         The LumiNUS API provides 2 separate endpoints for archived and non-archived announcements. By default,
         announcements are archived after roughly 16 weeks (hence, the end of the
         semester) so most of the times, we should never need to access archived announcements.
         """
-        """
-    case API.api(auth, uri) do
-      {:ok, %{"data" => data}} ->
-        {:ok,
-         Enum.map(data, fn %{"title" => title, "description" => description, "displayFrom" => datetime} ->
-           datetime =
-             case DateTime.from_iso8601(datetime) do
-               {:ok, datetime, _} -> datetime
-               {:error, _} -> nil
-             end
-
-           %{title: title, description: HtmlSanitizeEx.strip_tags(description), datetime: datetime}
-         end)}
-
-      {:ok, response} ->
-        {:error, {:unexpected_response, response}}
-
-      {:error, error} ->
-        {:error, error}
-    end
-        """
-
-        pass
+        result = api.get_announcements(auth, self.id, archived)
+        if result.okay:
+            return result.data
+        return None
 
     def lessons(self):
         pass
@@ -108,6 +91,22 @@ class Lesson:
         self.name = name
         self.week = week
         self.module_id = module_id
+
+    @classmethod
+    def from_api(cls, result: result, module: Module):
+        assert result.ok and all(
+            key in result.data for key in ["id", "name", "navigationLabel"]
+        )
+        data = result.data
+        return Lesson(
+            id=data["id"],
+            name=data["name"],
+            week=data["navigationLabel"],
+            module_id=module.id,
+        )
+
+    def files(self):
+        """get files associated with that lesson plan"""
 
 
 class File:

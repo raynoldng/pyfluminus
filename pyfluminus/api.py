@@ -8,6 +8,7 @@ from pyfluminus.constants import ErrorTypes
 import requests
 import urllib.parse as parse
 import json
+from dateutil.parser import parse as date_parse
 
 from typing import Dict, List, TYPE_CHECKING
 
@@ -32,7 +33,7 @@ class Result:
 class ErrorResult(Result):
     """convenience wrapper for initializing Error results"""
 
-    def __init__(self, error_type=None, error_msg=None):
+    def __init__(self, error_type=ErrorTypes.Error, error_msg=None):
         super().__init__(data=None, error_type=error_type, error_msg=error_msg)
 
 
@@ -70,16 +71,24 @@ def modules(auth: Dict, current_term_only: bool = False) -> Result:
     return ErrorResult(ErrorTypes.UnexpectedResponse, response)
 
 
-def get_annoucements(auth: Dict, module_id: str, archive: bool) -> Result:
+def get_announcements(auth: Dict, module_id: str, archive: bool) -> Result:
     fields = ["title", "description", "displayFrom"]
     uri = "/announcement/{}/{}?sortby=displayFrom%20ASC".format(
         "Archived" if archive else "NonArchived", module_id
     )
     response = api(auth, uri)
     if "data" in response:
-        if not all(key in response["data"] for key in fields):
-            return ErrorResult(ErrorTypes.UnexpectedResponse, response)
-        return Result({field: response["data"][field] for field in fields})
+        announcements = response['data']
+        result_data = []
+        for announcement in response['data']:
+            if not all(key in announcement for key in fields):
+                return ErrorResult(ErrorTypes.UnexpectedResponse, response)
+            result_data.append({
+                'title': announcement['title'],
+                'description': utils.remove_html_tags(announcement['description']),
+                'datetime': date_parse(announcement['displayFrom'])
+            })
+        return Result(result_data)
     return ErrorResult(ErrorTypes.Error)
 
 
