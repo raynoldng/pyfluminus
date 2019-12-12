@@ -15,12 +15,17 @@ def sanitise_filename(name, replacement="-"):
 
 
 def download(url: str, destination: str, verbose: bool):
-    # TODO add verbose, for now ignored
+    return download_w_session(requests, destination, url, verbose)
 
+
+def download_w_session(session, url: str, destination: str, verbose: bool):
+    """sessions object needed to download webcasts due to the cookies generating in 
+    the video url query used to authenticate download request"""
+    # TODO add verbose, for now ignored
     if os.path.isfile(destination):
         return ErrorResult(ErrorTypes.FileExists)
 
-    response = requests.get(url, allow_redirects=True)
+    response = session.get(url, allow_redirects=True)
 
     # if directory does not exist then create it
     dir_path = os.path.dirname(destination)

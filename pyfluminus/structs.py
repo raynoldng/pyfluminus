@@ -4,6 +4,8 @@ from pyfluminus import utils
 from pyfluminus import api
 from pyfluminus.api_structs import Result, ErrorResult
 import os
+import requests
+from bs4 import BeautifulSoup
 
 
 class Module:
@@ -78,7 +80,7 @@ class Module:
 
     def weblectures(self, auth: Dict) -> List[Weblecture]:
         """Get all weblectures for this mod"""
-        result = api.get_lessons(auth, self.id)
+        result = api.get_weblectures(auth, self.id)
         if result.okay:
             return result.data
         else:
@@ -264,10 +266,9 @@ class File:
         destination = os.path.join(path, self.name)
         url = self.get_download_url(auth)
 
-        if self.multimedia:
-            return utils.download_multimedia(url, destination, verbose)
-        else:
-            return utils.download(url, destination, verbose)
+        # NOTE it seems that requests handle multimedia downloads perfectly, do
+        # not need to switch on if multimedia
+        return utils.download(url, destination, verbose)
 
     def load_children(self, auth: Dict) -> Result:
         # TODO handle get_children returning result
@@ -306,9 +307,38 @@ class Weblecture:
     def from_api(cls, api_data: Dict, module_id: str) -> Weblecture:
         return Weblecture(id=api_data["id"], name=api_data["name"], module_id=module_id)
 
-    def get_download_url(self, auth: Dict) -> str:
-        """obtains download url for given weblecture"""
-        pass
+    def download(self, auth: Dict, path: str, verbose: bool = False):
+        """Downloads file to location specified by path, a requests sessions is used 
+        as cookies are needed when downloading the mp4"""
 
-    def do_get_download_url(self, launch_url: str, data_items: Dict) -> str:
-        pass
+        session = requests.Session()
+        video_url = self.get_download_url(auth, session)
+        destination = os.path.join(path, utils.sanitise_filename(self.name) + ".mp4")
+        print(video_url, destination)
+
+        if video_url:
+            return utils.download_w_session(session, video_url, destination, False)
+
+    def get_download_url(self, auth: Dict, session) -> Optional[str]:
+        """obtains download url for given weblecture"""
+        # TODO migrate to api
+        # uri = "lti/Launch/panopto?context_id=#{module_id}&resource_link_id=#{id}"
+        uri = "lti/Launch/panopto?context_id={}&resource_link_id={}".format(
+            self.module_id, self.id
+        )
+        api_response = api.api(auth, uri)
+        if "launchURL" in api_response and "dataItems" in api_response:
+            launch_url, dataItems = api_response["launchURL"], api_response["dataItems"]
+
+            headers = {"Content-Type": "application/x-www-form-urlencoded"}
+            dataItemsCombined = {item["key"]: item["value"] for item in dataItems}
+            response = session.post(
+                launch_url, headers=headers, data=dataItemsCombined
+            )
+
+            soup = BeautifulSoup(response.text, "html.parser")
+            video = soup.find("meta", property="og:video")
+            return video["content"]
+
+        return None
+
