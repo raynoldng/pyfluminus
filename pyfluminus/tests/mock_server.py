@@ -42,7 +42,6 @@ for root, _subdirs, files in os.walk(AUTH_FIXTURES_PATH):
 
 class MockServerRequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
-        # TODO add more error handling
         def match(request_handler: BaseHTTPRequestHandler, fixture) -> bool:
             parsed_url = urlparse(request_handler.path)
             query_params = dict(parse_qsl(parsed_url.query))

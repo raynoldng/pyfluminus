@@ -30,7 +30,6 @@ module = Module(
 class TestModules(unittest.TestCase):
     @classmethod
     def setup_class(cls):
-        # TODO add mock server for auth
         cls.mock_server = start_mock_server(8082)  # for API
 
     @classmethod

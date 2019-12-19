@@ -18,7 +18,6 @@ authorization = {"jwt": id_token}
 class TestAPI(unittest.TestCase):
     @classmethod
     def setup_class(cls):
-        # TODO add mock server for auth
         start_mock_server(8082)  # for API
 
     def test_get_profile(self):

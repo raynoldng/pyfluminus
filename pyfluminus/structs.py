@@ -1,8 +1,8 @@
 from __future__ import annotations
 from typing import List, Dict, Optional
-from pyfluminus import utils
-from pyfluminus import api
-from pyfluminus.api_structs import Result, ErrorResult
+from pyfluminus import utils, api
+from pyfluminus.api_structs import Result, ErrorResult, EmptyResult, EmptyResultType
+from pyfluminus.constants import ErrorTypes
 import os
 import requests
 from bs4 import BeautifulSoup
@@ -71,14 +71,14 @@ class Module:
             return result.data
         return None
 
-    def lessons(self, auth: Dict) -> List[Lesson]:
+    def lessons(self, auth: Dict) -> Optional[List[Lesson]]:
         result = api.get_lessons(auth, self.id)
         if result.okay:
             return result.data
         else:
             return None
 
-    def weblectures(self, auth: Dict) -> List[Weblecture]:
+    def weblectures(self, auth: Dict) -> Optional[List[Weblecture]]:
         """Get all weblectures for this mod"""
         result = api.get_weblectures(auth, self.id)
         if result.okay:
@@ -88,7 +88,7 @@ class Module:
 
 
 class Lesson:
-    def __init__(self, id: str, name: str, week: str, module_id: str):
+    def __init__(self, id: str, name: str, week: int, module_id: str):
         """
         Provides an abstraction over a lesson plan in LumiNUS, and operations possible on them using
         LumiNUS API.
@@ -116,6 +116,16 @@ class Lesson:
     def files(self):
         # TODO implement me
         """get files associated with that lesson plan"""
+        uri = "lessonplan/Activity/?populate=TargetAncestor&ModuleID={}&LessonID={}".format(
+            self.module_id, self.id
+        )
+        api_response = api.api(auth, uri)
+        if "error" in api_response:
+            return ErrorResult(ErrorTypes.Error, api_response["error"])
+
+        if isinstance(api_response, list):
+            return [File.from_lesson(data) for data in api_response]
+        return None
 
     def __eq__(self, other):
         return (
@@ -132,7 +142,7 @@ class File:
         id: str,
         name: str,
         directory: bool,
-        children: List,
+        children: Optional[List],
         allow_upload: bool,
         multimedia: bool,
     ):
@@ -231,7 +241,6 @@ class File:
 
     @classmethod
     def parse_child(cls, data: Dict, allow_upload: bool) -> File:
-        # TODO handle add creator name
         is_directory = isinstance(data.get("access", None), dict)
         return File(
             id=data["id"],
@@ -270,14 +279,13 @@ class File:
         # not need to switch on if multimedia
         return utils.download(url, destination, verbose)
 
-    def load_children(self, auth: Dict) -> Result:
-        # TODO handle get_children returning result
+    def load_children(self, auth: Dict) -> EmptyResultType:
         if self.directory:
             children = File.get_children(auth, self.id, allow_upload=self.allow_upload)
             self.children = children
         else:
             self.children = []
-        return Result()
+        return EmptyResult()
 
 
 class Weblecture:
@@ -314,7 +322,6 @@ class Weblecture:
         session = requests.Session()
         video_url = self.get_download_url(auth, session)
         destination = os.path.join(path, utils.sanitise_filename(self.name) + ".mp4")
-        print(video_url, destination)
 
         if video_url:
             return utils.download_w_session(session, video_url, destination, False)
@@ -322,7 +329,6 @@ class Weblecture:
     def get_download_url(self, auth: Dict, session) -> Optional[str]:
         """obtains download url for given weblecture"""
         # TODO migrate to api
-        # uri = "lti/Launch/panopto?context_id=#{module_id}&resource_link_id=#{id}"
         uri = "lti/Launch/panopto?context_id={}&resource_link_id={}".format(
             self.module_id, self.id
         )
@@ -332,9 +338,7 @@ class Weblecture:
 
             headers = {"Content-Type": "application/x-www-form-urlencoded"}
             dataItemsCombined = {item["key"]: item["value"] for item in dataItems}
-            response = session.post(
-                launch_url, headers=headers, data=dataItemsCombined
-            )
+            response = session.post(launch_url, headers=headers, data=dataItemsCombined)
 
             soup = BeautifulSoup(response.text, "html.parser")
             video = soup.find("meta", property="og:video")

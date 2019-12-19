@@ -116,6 +116,8 @@ def get_weblectures(auth: Dict, module_id: str) -> Result:
     ) if isinstance(children_result['data'], list) else ErrorResult()
 
 def api(auth: Dict, path: str, method="get", headers=None, data=None):
+    """luminus API call, returns response content if successful, else an eror dict
+    """
     if headers is None:
         headers = dict()
     headers.update(
