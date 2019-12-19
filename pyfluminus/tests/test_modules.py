@@ -5,11 +5,7 @@ from dateutil.parser import parse
 
 from nose.tools import assert_dict_contains_subset, assert_list_equal, assert_true
 
-from pyfluminus.tests.mock_server import (
-    get_free_port,
-    start_mock_server,
-    MOCK_CONSTANTS,
-)
+from pyfluminus.tests.mock_server import MOCK_CONSTANTS
 from pyfluminus.structs import Module, File
 from pyfluminus import api
 from pyfluminus.constants import ErrorTypes
@@ -28,14 +24,6 @@ module = Module(
 
 
 class TestModules(unittest.TestCase):
-    @classmethod
-    def setup_class(cls):
-        cls.mock_server = start_mock_server(8082)  # for API
-
-    @classmethod
-    def tearDownClass(cls):
-        cls.mock_server.shutdown()
-
     def test_from_api(self):
         api_data = {
             "id": "57290e55-335a-4c09-b904-a795572d6cda",
@@ -65,7 +53,7 @@ class TestModules(unittest.TestCase):
         self.assertIsNone(Module.from_api({}))
 
     def test_announcements(self):
-        self.maxDiff =None
+        self.maxDiff = None
         with patch.dict("pyfluminus.api.__dict__", MOCK_CONSTANTS):
             announcements = module.announcements(authorization)
         expected_announcements = [
@@ -89,9 +77,9 @@ class TestModules(unittest.TestCase):
         for a1, a2 in zip(expected_announcements, announcements):
             # NOTE annoying to match the entire description text due to the html
             # parsing library differs to platform
-            self.assertEqual(a1['datetime'], a2['datetime'])
-            self.assertEqual(a1['title'], a2['title'])
-            self.assertEqual(a1['description'][:5], a2['description'][:5])
+            self.assertEqual(a1["datetime"], a2["datetime"])
+            self.assertEqual(a1["title"], a2["title"])
+            self.assertEqual(a1["description"][:5], a2["description"][:5])
 
     def test_announcements_archived(self):
         with patch.dict("pyfluminus.api.__dict__", MOCK_CONSTANTS):

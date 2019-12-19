@@ -3,11 +3,7 @@ from unittest.mock import patch
 
 from nose.tools import assert_dict_contains_subset, assert_list_equal, assert_true
 
-from pyfluminus.tests.mock_server import (
-    get_free_port,
-    start_mock_server,
-    MOCK_CONSTANTS,
-)
+from pyfluminus.tests.mock_server import MOCK_CONSTANTS
 from pyfluminus.structs import Module, Lesson, File, Weblecture
 from pyfluminus import api
 
@@ -16,9 +12,6 @@ authorization = {"jwt": id_token}
 
 
 class TestAPI(unittest.TestCase):
-    @classmethod
-    def setup_class(cls):
-        start_mock_server(8082)  # for API
 
     def test_get_profile(self):
         with patch.dict("pyfluminus.api.__dict__", MOCK_CONSTANTS):

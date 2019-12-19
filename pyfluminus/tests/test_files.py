@@ -4,11 +4,7 @@ import os, shutil
 
 from nose.tools import assert_dict_contains_subset, assert_list_equal, assert_true
 
-from pyfluminus.tests.mock_server import (
-    get_free_port,
-    start_mock_server,
-    MOCK_CONSTANTS,
-)
+from pyfluminus.tests.mock_server import MOCK_CONSTANTS
 from pyfluminus.structs import Module, File
 from pyfluminus import api
 from pyfluminus.constants import ErrorTypes
@@ -36,15 +32,12 @@ sample_file = File(
 class TestFiles(unittest.TestCase):
     @classmethod
     def setup_class(cls):
-        cls.mock_server = start_mock_server(8082)  # for API
-
         if os.path.exists(temp_dir) and os.path.isdir(temp_dir):
             print("removed test generated files")
             shutil.rmtree(temp_dir)
 
     @classmethod
     def tearDownClass(cls):
-        cls.mock_server.shutdown()
         if os.path.exists(temp_dir) and os.path.isdir(temp_dir):
             print("removed test generated files")
             shutil.rmtree(temp_dir)
