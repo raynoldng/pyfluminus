@@ -67,13 +67,13 @@ class Module:
         semester) so most of the times, we should never need to access archived announcements.
         """
         result = api.get_announcements(auth, self.id, archived)
-        if result.okay:
+        if result.ok:
             return result.data
         return None
 
     def lessons(self, auth: Dict) -> Optional[List[Lesson]]:
         result = api.get_lessons(auth, self.id)
-        if result.okay:
+        if result.ok:
             return result.data
         else:
             return None
@@ -81,7 +81,7 @@ class Module:
     def weblectures(self, auth: Dict) -> Optional[List[Weblecture]]:
         """Get all weblectures for this mod"""
         result = api.get_weblectures(auth, self.id)
-        if result.okay:
+        if result.ok:
             return result.data
         else:
             return None
@@ -123,8 +123,8 @@ class Lesson:
         if "error" in api_response:
             return ErrorResult(ErrorTypes.Error, api_response["error"])
 
-        if isinstance(api_response, list):
-            return [File.from_lesson(data) for data in api_response]
+        if 'ok' in api_response and isinstance(api_response['ok'], list):
+            return [File.from_lesson(data) for data in api_response['ok']]
         return None
 
     def __eq__(self, other):
@@ -226,13 +226,11 @@ class File:
 
     @classmethod
     def get_children(cls, auth: Dict, id: str, allow_upload: bool) -> List[File]:
-        directory_children = api.api(auth, "files/?ParentID={}".format(id))
+        directory_children = api.api(auth, "files/?ParentID={}".format(id))['ok']
         directory_files = api.api(
             auth,
             "files/{}/file{}".format(id, "?populate=Creator" if allow_upload else ""),
-        )
-        # print(directory_children)
-        # print(directory_files)
+        )['ok']
 
         return [
             cls.parse_child(file_data, allow_upload)
@@ -260,12 +258,12 @@ class File:
     def get_download_url(self, auth: Dict):
         if self.multimedia:
             uri = "multimedia/media/{}".format(self.id)
-            response = api.api(auth, uri)
+            response = api.api(auth, uri)['ok']
             return response.get("steamUrlPath", None)
 
         else:
             uri = "files/file/{}/downloadurl".format(self.id)
-            response = api.api(auth, uri)
+            response = api.api(auth, uri)['ok']
             return response.get("data", None)
 
     def download(self, auth: Dict, path: str, verbose: bool = False) -> Result:
@@ -332,7 +330,7 @@ class Weblecture:
         uri = "lti/Launch/panopto?context_id={}&resource_link_id={}".format(
             self.module_id, self.id
         )
-        api_response = api.api(auth, uri)
+        api_response = api.api(auth, uri)['ok']
         if "launchURL" in api_response and "dataItems" in api_response:
             launch_url, dataItems = api_response["launchURL"], api_response["dataItems"]
 

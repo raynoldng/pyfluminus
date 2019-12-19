@@ -230,7 +230,7 @@ class TestFiles(unittest.TestCase):
         with patch.dict("pyfluminus.api.__dict__", MOCK_CONSTANTS):
             result = file.load_children(authorization)
 
-        self.assertTrue(result.okay)
+        self.assertTrue(result.ok)
         self.assertEqual(len(expected_children), len(file.children))
         for child1, child2 in zip(expected_children, file.children):
             self.assertEqual(child1, child2, "{}\n{}".format(child1, child2))
@@ -247,7 +247,7 @@ class TestFiles(unittest.TestCase):
         with patch.dict("pyfluminus.api.__dict__", MOCK_CONSTANTS):
             result = file.load_children(authorization)
 
-        self.assertTrue(result.okay)
+        self.assertTrue(result.ok)
         expected_childen = [
             File(
                 id="7c464b62-3811-4c87-b1d1-7407e6ec321b",
@@ -281,12 +281,12 @@ class TestFiles(unittest.TestCase):
         )
         with patch.dict("pyfluminus.api.__dict__", MOCK_CONSTANTS):
             result1 = file.load_children(authorization)
-        self.assertTrue(result1.okay)
+        self.assertTrue(result1.ok)
         self.assertListEqual([], file.children)
 
         with patch.dict("pyfluminus.api.__dict__", MOCK_CONSTANTS):
             result2 = file.load_children(authorization)
-        self.assertTrue(result2.okay)
+        self.assertTrue(result2.ok)
         self.assertListEqual([], file.children)
 
     def test_get_download_url(self):
@@ -301,7 +301,7 @@ class TestFiles(unittest.TestCase):
         with patch.dict("pyfluminus.api.__dict__", MOCK_CONSTANTS):
             result1 = sample_file.download(authorization, temp_dir)
             expected_filepath = os.path.join(temp_dir, sample_file.name)
-            self.assertTrue(result1.okay)
+            self.assertTrue(result1.ok)
             self.assertTrue(
                 os.path.exists(expected_filepath),
                 "cannnot find file {}".format(expected_filepath),
@@ -311,6 +311,6 @@ class TestFiles(unittest.TestCase):
                     "This is just a sample file.\n", "".join(f.readlines())
                 )
             result2 = sample_file.download(authorization, temp_dir)
-            self.assertFalse(result2.okay)
+            self.assertFalse(result2.ok)
             self.assertEquals(result2.error_type, ErrorTypes.FileExists)
 

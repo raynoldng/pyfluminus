@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
 
 def name(auth: Dict) -> Result:
-    response = api(auth, "user/Profile")
+    response = api(auth, "user/Profile")['ok']
     if "userNameOriginal" in response:
         name = response["userNameOriginal"].title()
         return Result(data=name)
@@ -26,7 +26,7 @@ def current_term(auth: Dict) -> Result:
     """returns info about current term
     e.g.: {term: "1820", description: "2018/2019 Semester 2"}
     """
-    response = api(auth, "/setting/AcademicWeek/current?populate=termDetail")
+    response = api(auth, "/setting/AcademicWeek/current?populate=termDetail")['ok']
     if "termDetail" in response:
         return Result(
             {
@@ -42,7 +42,7 @@ def modules(auth: Dict, current_term_only: bool = False) -> Result:
     """
     from pyfluminus.structs import Module
 
-    response = api(auth, "module")
+    response = api(auth, "module")['ok']
     if "data" in response:
         return Result([Module.from_api(mod_data) for mod_data in response["data"]])
     return ErrorResult(ErrorTypes.UnexpectedResponse, response)
@@ -53,7 +53,7 @@ def get_announcements(auth: Dict, module_id: str, archive: bool) -> Result:
     uri = "/announcement/{}/{}?sortby=displayFrom%20ASC".format(
         "Archived" if archive else "NonArchived", module_id
     )
-    response = api(auth, uri)
+    response = api(auth, uri)['ok']
     if "data" in response:
         announcements = response["data"]
         result_data = []
@@ -75,7 +75,7 @@ def get_lessons(auth: Dict, module_id: str) -> Result:
     from pyfluminus.structs import Lesson
 
     uri = "/lessonplan/Lesson/?ModuleID={}".format(module_id)
-    response = api(auth, uri)
+    response = api(auth, uri)['ok']
     if "data" in response:
         return Result(
             [
@@ -92,7 +92,7 @@ def get_files_from_lesson(auth: Dict, lesson: Lesson) -> Result:
     uri = "/lessonplan/Activity/?populate=TargetAncestor&ModuleID={}&LessonID={}".format(
         lesson.module_id, lesson.id
     )
-    response = api(auth, uri)
+    response = api(auth, uri)['ok']
     if "data" in response:
         files = [File.from_lesson(file_data) for file_data in response["data"]]
         return Result([f for f in files if f is not None])
@@ -102,13 +102,13 @@ def get_files_from_lesson(auth: Dict, lesson: Lesson) -> Result:
 def get_weblectures(auth: Dict, module_id: str) -> Result:
     from pyfluminus.structs import Weblecture
     uri_parent = "weblecture/?ParentID={}".format(module_id)
-    parent_result = api(auth, uri_parent)
+    parent_result = api(auth, uri_parent)['ok']
     if "error" in parent_result:
         return ErrorResult()
     uri_children = "weblecture/{}/sessions/?sortby=createdDate".format(
         parent_result["id"]
     )
-    children_result = api(auth, uri_children)
+    children_result = api(auth, uri_children)['ok']
     if not "data" in children_result:
         return ErrorResult()
     return Result(
@@ -135,7 +135,10 @@ def api(auth: Dict, path: str, method="get", headers=None, data=None):
 
     status_code = response.status_code
     if status_code == 200:
-        return json.loads(response.content)
+        try:
+            return {"ok": json.loads(response.content)}
+        except Exception as e:
+            return {"error": e}
     elif status_code == 401:
         return {"error": "expired token"}
     return {"error": response.content}

@@ -16,13 +16,13 @@ class TestAPI(unittest.TestCase):
     def test_get_profile(self):
         with patch.dict("pyfluminus.api.__dict__", MOCK_CONSTANTS):
             result = api.name(authorization)
-            self.assertTrue(result.okay)
+            self.assertTrue(result.ok)
             self.assertEqual(result.data, "John Smith")
 
     def test_get_current_term(self):
         with patch.dict("pyfluminus.api.__dict__", MOCK_CONSTANTS):
             result = api.current_term(authorization)
-        self.assertTrue(result.okay)
+        self.assertTrue(result.ok)
         self.assertDictEqual(
             result.data, {"term": "1820", "description": "2018/2019 Semester 2"}
         )
@@ -68,7 +68,7 @@ class TestAPI(unittest.TestCase):
         with patch.dict("pyfluminus.api.__dict__", MOCK_CONSTANTS):
             result = api.modules(authorization)
 
-        self.assertTrue(result.okay)
+        self.assertTrue(result.ok)
         modules = result.data
         modules.sort(key=lambda mod: mod.id)
         expected_modules.sort(key=lambda mod: mod.id)
@@ -179,7 +179,7 @@ class TestAPI(unittest.TestCase):
 
         with patch.dict("pyfluminus.api.__dict__", MOCK_CONSTANTS):
             result = api.get_files_from_lesson(authorization, lesson)
-        self.assertTrue(result.okay)
+        self.assertTrue(result.ok)
         self.assertEqual(len(result.data), 1)
         self.assertEqual(result.data[0], expected_file)
 
@@ -255,7 +255,7 @@ class TestAPI(unittest.TestCase):
         with patch.dict("pyfluminus.api.__dict__", MOCK_CONSTANTS):
             result = api.get_weblectures(authorization, module_id)
 
-        self.assertTrue(result.okay)
+        self.assertTrue(result.ok)
         weblectures = result.data
         self.assertEqual(len(weblectures), len(expected_weblectures))
         for w1, w2 in zip(weblectures, expected_weblectures):
