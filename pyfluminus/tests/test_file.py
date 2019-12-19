@@ -29,7 +29,7 @@ sample_file = File(
 )
 
 
-class TestFiles(unittest.TestCase):
+class TestFile(unittest.TestCase):
     @classmethod
     def setup_class(cls):
         if os.path.exists(temp_dir) and os.path.isdir(temp_dir):
@@ -83,7 +83,6 @@ class TestFiles(unittest.TestCase):
         )
 
         with patch.dict("pyfluminus.api.__dict__", MOCK_CONSTANTS):
-            # file = api.get_file_from_module(authorization, module)
             file = File.from_module(authorization, module)
         self.assertEquals(file.name, "CS1231-MA1100")
 

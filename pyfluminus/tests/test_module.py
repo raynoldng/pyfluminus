@@ -6,7 +6,7 @@ from dateutil.parser import parse
 from nose.tools import assert_dict_contains_subset, assert_list_equal, assert_true
 
 from pyfluminus.tests.mock_server import MOCK_CONSTANTS
-from pyfluminus.structs import Module, File
+from pyfluminus.structs import Module, File, Lesson
 from pyfluminus import api
 from pyfluminus.constants import ErrorTypes
 
@@ -23,7 +23,7 @@ module = Module(
 )
 
 
-class TestModules(unittest.TestCase):
+class TestModule(unittest.TestCase):
     def test_from_api(self):
         api_data = {
             "id": "57290e55-335a-4c09-b904-a795572d6cda",
@@ -51,6 +51,67 @@ class TestModules(unittest.TestCase):
             module = Module.from_api(api_data)
         self.assertEqual(module, expected_module)
         self.assertIsNone(Module.from_api({}))
+
+    def test_get_lesssons(self):
+        module_id = "9db79e1f-4b15-4fe9-8783-363990eeff09"
+        test_module = Module(
+                id='9db79e1f-4b15-4fe9-8783-363990eeff09',
+                code='CS4261/CS5461',
+                name='Algorithmic Mechanism Design',
+                teaching=False,
+                term='1910',
+        )
+        expected_lessons = [
+            Lesson(
+                id="e344491c-dc7a-493b-88f3-db9157e2853b",
+                name="Week 7: ",
+                week=7,
+                module_id="9db79e1f-4b15-4fe9-8783-363990eeff09",
+            ),
+            Lesson(
+                id="f538653c-af50-42d2-8b7b-898e8f941998",
+                name="Week 8: ",
+                week=8,
+                module_id="9db79e1f-4b15-4fe9-8783-363990eeff09",
+            ),
+            Lesson(
+                id="fc27c2ab-b790-4f8e-b2ce-07b5757d8189",
+                name="Week 9: ",
+                week=9,
+                module_id="9db79e1f-4b15-4fe9-8783-363990eeff09",
+            ),
+            Lesson(
+                id="9991c6cc-a05d-4962-ba6c-f9fa47aed573",
+                name="Week 10: ",
+                week=10,
+                module_id="9db79e1f-4b15-4fe9-8783-363990eeff09",
+            ),
+            Lesson(
+                id="7760a4e3-57e2-435b-a6d9-494e8ac7ed30",
+                name="Week 11: ",
+                week=11,
+                module_id="9db79e1f-4b15-4fe9-8783-363990eeff09",
+            ),
+            Lesson(
+                id="4d2de7e3-9ab4-4cf3-b29e-cc8a2d7f1382",
+                name="Week 12: ",
+                week=12,
+                module_id="9db79e1f-4b15-4fe9-8783-363990eeff09",
+            ),
+            Lesson(
+                id="e75410c3-ee66-4631-8b7b-b2dd744e839a",
+                name="Week 13: ",
+                week=13,
+                module_id="9db79e1f-4b15-4fe9-8783-363990eeff09",
+            ),
+        ]
+        with patch.dict("pyfluminus.api.__dict__", MOCK_CONSTANTS):
+            lessons = test_module.lessons(authorization)
+
+        # lessons = result.data
+        self.assertEqual(len(lessons), len(expected_lessons))
+        for lesson1, lesson2 in zip(lessons, expected_lessons):
+            self.assertEqual(lesson1, lesson2)
 
     def test_announcements(self):
         self.maxDiff = None

@@ -1,11 +1,13 @@
 from __future__ import annotations
 from typing import List, Dict, Optional
-from pyfluminus import utils, api
+from pyfluminus import utils
+from pyfluminus.api import api
 from pyfluminus.api_structs import Result, ErrorResult, EmptyResult, EmptyResultType
 from pyfluminus.constants import ErrorTypes
 import os
 import requests
 from bs4 import BeautifulSoup
+from dateutil.parser import parse as date_parse
 
 
 class Module:
@@ -66,25 +68,55 @@ class Module:
         announcements are archived after roughly 16 weeks (hence, the end of the
         semester) so most of the times, we should never need to access archived announcements.
         """
-        result = api.get_announcements(auth, self.id, archived)
-        if result.ok:
-            return result.data
-        return None
+
+        fields = ["title", "description", "displayFrom"]
+        uri = "/announcement/{}/{}?sortby=displayFrom%20ASC".format(
+            "Archived" if archived else "NonArchived", self.id
+        )
+        response = api(auth, uri)
+        if "error" in response:
+            return None
+        response = response["ok"]
+        if "data" not in response:
+            return None
+        announcements = response["data"]
+        result = []
+        for announcement in response["data"]:
+            if not all(key in announcement for key in fields):
+                return None
+            result.append(
+                {
+                    "title": announcement["title"],
+                    "description": utils.remove_html_tags(announcement["description"]),
+                    "datetime": date_parse(announcement["displayFrom"]),
+                }
+            )
+        return result
 
     def lessons(self, auth: Dict) -> Optional[List[Lesson]]:
-        result = api.get_lessons(auth, self.id)
-        if result.ok:
-            return result.data
-        else:
+        uri = "/lessonplan/Lesson/?ModuleID={}".format(self.id)
+        response = api(auth, uri)["ok"]
+        if "data" not in response:
             return None
+        return [
+            Lesson.from_api(lesson_data, self.id) for lesson_data in response["data"]
+        ]
 
     def weblectures(self, auth: Dict) -> Optional[List[Weblecture]]:
         """Get all weblectures for this mod"""
-        result = api.get_weblectures(auth, self.id)
-        if result.ok:
-            return result.data
-        else:
+        uri_parent = "weblecture/?ParentID={}".format(self.id)
+        parent_result = api(auth, uri_parent)["ok"]
+        if "error" in parent_result:
             return None
+        uri_children = "weblecture/{}/sessions/?sortby=createdDate".format(
+            parent_result["id"]
+        )
+        children_result = api(auth, uri_children)["ok"]
+        if not "data" in children_result or not isinstance(
+            children_result["data"], list
+        ):
+            return None
+        return [Weblecture.from_api(item, self.id) for item in children_result["data"]]
 
 
 class Lesson:
@@ -113,18 +145,17 @@ class Lesson:
             module_id=module_id,
         )
 
-    def files(self):
-        # TODO implement me
+    def files(self, auth: Dict):
         """get files associated with that lesson plan"""
         uri = "lessonplan/Activity/?populate=TargetAncestor&ModuleID={}&LessonID={}".format(
             self.module_id, self.id
         )
-        api_response = api.api(auth, uri)
-        if "error" in api_response:
-            return ErrorResult(ErrorTypes.Error, api_response["error"])
-
-        if 'ok' in api_response and isinstance(api_response['ok'], list):
-            return [File.from_lesson(data) for data in api_response['ok']]
+        response = api(auth, uri)["ok"]
+        # NOTE items could also include links to weblectures etc, thus File.from_lesson(data) 
+        # could be None, filter those out
+        if "data" in response and isinstance(response["data"], list):
+            result = [File.from_lesson(data) for data in response["data"]]
+            return [f for f in result if f]
         return None
 
     def __eq__(self, other):
@@ -226,11 +257,11 @@ class File:
 
     @classmethod
     def get_children(cls, auth: Dict, id: str, allow_upload: bool) -> List[File]:
-        directory_children = api.api(auth, "files/?ParentID={}".format(id))['ok']
-        directory_files = api.api(
+        directory_children = api(auth, "files/?ParentID={}".format(id))["ok"]
+        directory_files = api(
             auth,
             "files/{}/file{}".format(id, "?populate=Creator" if allow_upload else ""),
-        )['ok']
+        )["ok"]
 
         return [
             cls.parse_child(file_data, allow_upload)
@@ -258,12 +289,12 @@ class File:
     def get_download_url(self, auth: Dict):
         if self.multimedia:
             uri = "multimedia/media/{}".format(self.id)
-            response = api.api(auth, uri)['ok']
+            response = api(auth, uri)["ok"]
             return response.get("steamUrlPath", None)
 
         else:
             uri = "files/file/{}/downloadurl".format(self.id)
-            response = api.api(auth, uri)['ok']
+            response = api(auth, uri)["ok"]
             return response.get("data", None)
 
     def download(self, auth: Dict, path: str, verbose: bool = False) -> Result:
@@ -326,11 +357,10 @@ class Weblecture:
 
     def get_download_url(self, auth: Dict, session) -> Optional[str]:
         """obtains download url for given weblecture"""
-        # TODO migrate to api
         uri = "lti/Launch/panopto?context_id={}&resource_link_id={}".format(
             self.module_id, self.id
         )
-        api_response = api.api(auth, uri)['ok']
+        api_response = api(auth, uri)["ok"]
         if "launchURL" in api_response and "dataItems" in api_response:
             launch_url, dataItems = api_response["launchURL"], api_response["dataItems"]
 
