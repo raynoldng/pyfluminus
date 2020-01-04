@@ -1,0 +1,12 @@
+language: python
+sudo: false
+python:
+  - "3.6"
+install:
+  - pip install -U pip
+  - python setup.py
+  - pip install coverage
+script:
+  - nosetests --with-coverage --cover-package=pyfluminus
+after_success:
+  - coveralls
