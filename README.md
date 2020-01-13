@@ -23,7 +23,7 @@ To download your files:
 
 ```
 mkdir /tmp/fluminus
-python pyfluminus_cli.py --download-to=/tmp/fluminus
+python pyfluminus_cli.py -username="e123456" -password="passw0rd"  --download-to=/tmp/luminus
 ```
 
 This downloads files of all your modules to the directory specified. To download files again simply do:
