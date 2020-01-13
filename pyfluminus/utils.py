@@ -15,6 +15,7 @@ def sanitise_filename(name: str, replacement="-") -> str:
 
 
 def download(url: str, destination: str, verbose: bool) -> Result:
+    # TODO verbose currently doesnt do anything
     if os.path.isfile(destination):
         return ErrorResult(ErrorTypes.FileExists)
 

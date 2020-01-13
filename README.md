@@ -17,8 +17,23 @@ Features (at parity with [fluminus](https://github.com/indocomsoft/fluminus))
 - Get listing of webcasts and download them
 - Get listing of weekly lesson plans and their associated files
 
+# CLI Usage
+
+To download your files:
+
+```
+mkdir /tmp/fluminus
+python pyfluminus_cli.py --download-to=/tmp/fluminus
+```
+
+This downloads files of all your modules to the directory specified. To download files again simply do:
+
+```
+python pyfluminus_cli.py -username="e123456" -password="passw0rd"  --download-to=/tmp/luminus
+```
+
 
 # Todos
-- [ ] CLI 
+- [ ] get credentials from environment
 - [ ] upload to PyPi
 - [ ] (maybe?) GUI

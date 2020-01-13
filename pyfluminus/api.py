@@ -8,7 +8,7 @@ import urllib.parse as parse
 import json
 from dateutil.parser import parse as date_parse
 
-from typing import Dict, List, TYPE_CHECKING
+from typing import Dict, List, TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
     from pyfluminus.structs import Module, File, Lesson
@@ -37,7 +37,7 @@ def current_term(auth: Dict) -> Result:
     return ErrorResult(ErrorTypes.UnexpectedResponse, response)
 
 
-def modules(auth: Dict, current_term_only: bool = False) -> Result:
+def modules(auth: Dict, current_term_only: bool = False) -> Result[List[Optional[Module]]]:
     """ returns list of modules that user with given authorization is reading
     """
     from pyfluminus.structs import Module
