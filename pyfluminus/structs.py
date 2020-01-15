@@ -58,7 +58,7 @@ class Module:
             name=api_data["courseName"],
             teaching=any(
                 api_data["access"].get(perm, False) for perm in cls.teaching_perms
-            ),
+            ) if "access" in api_data else False,
             term=api_data["term"],
         )
 
@@ -256,8 +256,14 @@ class File:
         )
 
     @classmethod
-    def get_children(cls, auth: Dict, id: str, allow_upload: bool) -> List[File]:
-        directory_children = api(auth, "files/?ParentID={}".format(id))["ok"]
+    def get_children(cls, auth: Dict, id: str, allow_upload: bool) -> Optional[List[File]]:
+        """get children of file. If it fails, e.g. for CP4101 return None
+        """
+        res = api(auth, "files/?ParentID={}".format(id))
+        if "error" in res:
+            print("Failed to get children: {}".format(res['error']))
+            return None
+        directory_children = res["ok"]
         directory_files = api(
             auth,
             "files/{}/file{}".format(id, "?populate=Creator" if allow_upload else ""),
