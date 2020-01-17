@@ -7,12 +7,14 @@ from typing import Dict, List
 
 
 parser = argparse.ArgumentParser(description="CLI wrapper to pyfluminus")
-# NOTE for now take in username and password via command line
+
+# Authentication
 parser.add_argument('-username', type=str, help="NUSNET username, e.g. e01234")
 parser.add_argument('-password', type=str, help="NUSNET password")
+parser.add_argument('--env', action="store_true", help="Get username and password from environment variables")
 
-# flags
-parser.add_argument("--download_to", type=str) # if downloading files
+# Other Flags
+parser.add_argument("--download_to", type=str, help="Download destination") # if downloading files
 parser.add_argument("--ignore", type=str, help="Comma separated list of modules to ignore (e.g. CS1231,CS4321)")
 
 def download_files(file: File, auth: Dict, download_path: str, verbose=False):
@@ -35,7 +37,13 @@ def download_files(file: File, auth: Dict, download_path: str, verbose=False):
 
 if __name__ == "__main__":
     args = parser.parse_args()
-    auth = vafs_jwt("nusstu\\" + args.username, args.password)
+    if args.env:
+        username = os.environ["LUMINUS_USERNAME"]
+        password = os.environ["LUMINUS_PASSWORD"]
+    else:
+        username = args.username
+        password = args.password
+    auth = vafs_jwt("nusstu\\" + username, password)
 
     if 'jwt' not in auth:
         print("Failed to authenticate:", auth['error'])
