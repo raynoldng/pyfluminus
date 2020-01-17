@@ -3,7 +3,7 @@ from pyfluminus.authorization import vafs_jwt
 from pyfluminus import api
 from pyfluminus.structs import File, Module
 import os
-from typing import Dict
+from typing import Dict, List
 
 
 parser = argparse.ArgumentParser(description="CLI wrapper to pyfluminus")
@@ -13,7 +13,7 @@ parser.add_argument('-password', type=str, help="NUSNET password")
 
 # flags
 parser.add_argument("--download_to", type=str) # if downloading files
-
+parser.add_argument("--ignore", type=str, help="Comma separated list of modules to ignore (e.g. CS1231,CS4321)")
 
 def download_files(file: File, auth: Dict, download_path: str, verbose=False):
     if not file.directory:
@@ -59,12 +59,24 @@ if __name__ == "__main__":
         print("- {} {}".format(module.code, module.name))
 
     if args.download_to:
+        ignored_modules: List[str] = [] 
+        if args.ignore:
+            ignored_modules = args.ignore.split(",")
         print("\n\nDownloading Files to {}".format(args.download_to))
+        actually_ignored_modules = []
         for module in modules:
             if module is None:
+                continue
+            if module.code in ignored_modules:
+                actually_ignored_modules.append(module)
                 continue
             print("{} {}".format(module.code, module.name))
             module_file = File.from_module(auth, module)
             # TODO set verbose=True for now
             download_files(module_file, auth, args.download_to, True)
+        if actually_ignored_modules:
+            print("Ignored the following module(s)")
+            for module in actually_ignored_modules:
+                print("- {} {}".format(module.code, module.name))
+        print("\nDONE")
 
