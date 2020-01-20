@@ -16,6 +16,7 @@ parser.add_argument('--env', action="store_true", help="Get username and passwor
 # Other Flags
 parser.add_argument("--download_to", type=str, help="Download destination") # if downloading files
 parser.add_argument("--ignore", type=str, help="Comma separated list of modules to ignore (e.g. CS1231,CS4321)")
+parser.add_argument("--announcements", action="store_true", help="Display announcements")
 
 def download_files(file: File, auth: Dict, download_path: str, verbose=False):
     if not file.directory:
@@ -66,10 +67,34 @@ if __name__ == "__main__":
             continue
         print("- {} {}".format(module.code, module.name))
 
+    ignored_modules: List[str] = [] 
+    if args.ignore:
+        ignored_modules = args.ignore.split(",")
+
+    if args.announcements:
+        print("\n# Announcements")
+        actually_ignored_modules = []
+        for module in modules:
+            if module is None:
+                continue
+            if module.code in ignored_modules:
+                actually_ignored_modules.append(module)
+                continue
+            print("\n## {}: {}".format(module.code, module.name))
+            announcements = module.announcements(auth)
+            if announcements is None:
+                print("Error retrieving annoucements")
+                continue
+            for ann in announcements:
+                print("### {}".format(ann['title']))
+                print("Posted on: {}\n".format(ann['datetime']))
+                print(ann["description"])
+        if actually_ignored_modules:
+            print("Ignored the following module(s)")
+            for module in actually_ignored_modules:
+                print("- {} {}".format(module.code, module.name))
+
     if args.download_to:
-        ignored_modules: List[str] = [] 
-        if args.ignore:
-            ignored_modules = args.ignore.split(",")
         print("\n\nDownloading Files to {}".format(args.download_to))
         actually_ignored_modules = []
         for module in modules:
@@ -87,4 +112,3 @@ if __name__ == "__main__":
             for module in actually_ignored_modules:
                 print("- {} {}".format(module.code, module.name))
         print("\nDONE")
-

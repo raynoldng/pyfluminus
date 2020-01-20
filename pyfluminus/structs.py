@@ -70,7 +70,7 @@ class Module:
         """
 
         fields = ["title", "description", "displayFrom"]
-        uri = "/announcement/{}/{}?sortby=displayFrom%20ASC".format(
+        uri = "announcement/{}/{}?sortby=displayFrom%20ASC".format(
             "Archived" if archived else "NonArchived", self.id
         )
         response = api(auth, uri)
@@ -79,7 +79,6 @@ class Module:
         response = response["ok"]
         if "data" not in response:
             return None
-        announcements = response["data"]
         result = []
         for announcement in response["data"]:
             if not all(key in announcement for key in fields):

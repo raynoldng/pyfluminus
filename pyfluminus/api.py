@@ -50,7 +50,7 @@ def modules(auth: Dict, current_term_only: bool = False) -> Result[List[Optional
 
 def get_announcements(auth: Dict, module_id: str, archive: bool) -> Result:
     fields = ["title", "description", "displayFrom"]
-    uri = "/announcement/{}/{}?sortby=displayFrom%20ASC".format(
+    uri = "announcement/{}/{}?sortby=displayFrom%20ASC".format(
         "Archived" if archive else "NonArchived", module_id
     )
     response = api(auth, uri)["ok"]

@@ -50,6 +50,7 @@ optional arguments:
                         Download destination
   --ignore IGNORE       Comma separated list of modules to ignore (e.g.
                         CS1231,CS4321)
+  --announcements       Display announcements
 ```
 
 # Todos
