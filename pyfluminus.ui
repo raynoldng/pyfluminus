@@ -17,7 +17,7 @@
    <item row="0" column="0">
     <widget class="QStackedWidget" name="stackedWidget">
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="page">
       <widget class="QLabel" name="label">
@@ -33,11 +33,11 @@
         <string>Username:</string>
        </property>
       </widget>
-      <widget class="QLineEdit" name="lineEdit_2">
+      <widget class="QLineEdit" name="Password">
        <property name="geometry">
         <rect>
          <x>240</x>
-         <y>250</y>
+         <y>280</y>
          <width>191</width>
          <height>21</height>
         </rect>
@@ -78,11 +78,11 @@
         <bool>false</bool>
        </property>
       </widget>
-      <widget class="QLineEdit" name="lineEdit">
+      <widget class="QLineEdit" name="Username">
        <property name="geometry">
         <rect>
          <x>240</x>
-         <y>290</y>
+         <y>250</y>
          <width>191</width>
          <height>21</height>
         </rect>
