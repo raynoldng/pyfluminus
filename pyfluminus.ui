@@ -17,7 +17,7 @@
    <item row="0" column="0">
     <widget class="QStackedWidget" name="stackedWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="page">
       <widget class="QLabel" name="label">
@@ -90,7 +90,7 @@
       </widget>
      </widget>
      <widget class="QWidget" name="page_2">
-      <widget class="QPushButton" name="pushButton">
+      <widget class="QPushButton" name="DownloadButton">
        <property name="geometry">
         <rect>
          <x>1040</x>
@@ -129,7 +129,7 @@
         <string>Welcome, Here are your files:</string>
        </property>
       </widget>
-      <widget class="QLineEdit" name="lineEdit_3">
+      <widget class="QLineEdit" name="DownloadLocation">
        <property name="geometry">
         <rect>
          <x>340</x>
@@ -217,22 +217,6 @@
  <connections>
   <connection>
    <sender>Login</sender>
-   <signal>accepted()</signal>
-   <receiver>Dialog</receiver>
-   <slot>update()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>248</x>
-     <y>254</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>157</x>
-     <y>274</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>Login</sender>
    <signal>rejected()</signal>
    <receiver>Dialog</receiver>
    <slot>reject()</slot>
@@ -243,6 +227,22 @@
     </hint>
     <hint type="destinationlabel">
      <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>Login</sender>
+   <signal>accepted()</signal>
+   <receiver>Dialog</receiver>
+   <slot>update()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>248</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
      <y>274</y>
     </hint>
    </hints>
