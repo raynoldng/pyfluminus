@@ -14,9 +14,11 @@ app = QApplication([])
 window = Window()
 
 FILE_DOWNLOAD_DIR = None
+AUTH = None
 
 
 def download_files(file: File, auth: Dict, download_path: str, verbose=False):
+
     if not file.directory:
         full_file_path = os.path.join(download_path, file.name)
         if os.path.exists(full_file_path):
@@ -26,14 +28,18 @@ def download_files(file: File, auth: Dict, download_path: str, verbose=False):
         return
     download_path = os.path.join(download_path, file.name)
     if file.children is None:
-        file.load_children(auth) 
-        if file.children is None: 
+        file.load_children(auth)
+        if file.children is None:
             print("Error loading children for file: {}".format(file.name))
             return
     for child in file.children:
         download_files(child, auth, download_path, verbose)
 
+
 def download():
+    # TODO: Somehow get auth data here
+    modules_res = api.modules(auth)
+    modules = module_res.data
     print("\n\nDownloading Files to {}".format(FILE_DOWNLOAD_DIR))
     actually_ignored_modules = []
     for module in modules:
@@ -68,13 +74,13 @@ def display_download_complete():
     msg.setText("Download Complete!")
     msg.exec_()
 
+
 def display_file_browser():
     dialog = FileDialog()
     # TODO: Find a way to get rid of this global
     FILE_DOWNLOAD_DIR = dialog.openFileNameDialog()
     form.DownloadLocation.setText("Download Location:" + FILE_DOWNLOAD_DIR)
 
-        
 
 def login():
     username = form.Username.text()
@@ -90,7 +96,6 @@ def login():
     print("Hello {}".format(name_res.data))
     get_modules_taken(auth)
     form.stackedWidget.setCurrentIndex(1)
-
 
 
 def get_modules_taken(auth):
