@@ -44,14 +44,22 @@ def download_files(file: File, auth: Dict, verbose=False):
     form.stackedWidget.setCurrentIndex(3)
 
 
+def display_incorrect_login_message():
+    msg = QMessageBox()
+    msg.setIcon(QMessageBox.Warning)
+    msg.setText("Error: ")
+    msg.setInformativeText("You have entered an incorrect Username or Password")
+    msg.setWindowTitle("Incorrect Username/Password")
+    msg.exec_()
+
 def login():
     username = form.Username.text()
     password = form.Password.text()
     auth = vafs_jwt("nusstu\\" + username, password)
-
     if "jwt" not in auth:
         print("Failed to authenticate:", auth["error"])
-        exit()
+        display_incorrect_login_message()
+        return
     name_res = api.name(auth)
     if not name_res.ok:
         print("Error getting name: ", name_res.error_msg)
@@ -76,6 +84,7 @@ def get_modules_taken(auth):
 form = Form()
 form.setupUi(window)
 # Configure messages
+
 form.Login.clicked.connect(login)
 # form.DownloadButton.clicked.connect(download_files())
 

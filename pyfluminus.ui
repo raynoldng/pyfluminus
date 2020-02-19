@@ -17,196 +17,168 @@
    <item row="0" column="0">
     <widget class="QStackedWidget" name="stackedWidget">
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="page">
-      <widget class="QLabel" name="label">
+      <widget class="QGroupBox" name="groupBox">
        <property name="geometry">
         <rect>
-         <x>110</x>
-         <y>-80</y>
-         <width>66</width>
-         <height>687</height>
+         <x>480</x>
+         <y>230</y>
+         <width>351</width>
+         <height>251</height>
         </rect>
        </property>
-       <property name="text">
-        <string>Username:</string>
+       <property name="title">
+        <string>GroupBox</string>
        </property>
-      </widget>
-      <widget class="QLineEdit" name="Password">
-       <property name="geometry">
-        <rect>
-         <x>240</x>
-         <y>280</y>
-         <width>191</width>
-         <height>21</height>
-        </rect>
-       </property>
-       <property name="echoMode">
-        <enum>QLineEdit::Password</enum>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_2">
-       <property name="geometry">
-        <rect>
-         <x>110</x>
-         <y>280</y>
-         <width>71</width>
-         <height>31</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Password:</string>
-       </property>
-      </widget>
-      <widget class="QDialogButtonBox" name="Login">
-       <property name="geometry">
-        <rect>
-         <x>-220</x>
-         <y>470</y>
-         <width>801</width>
-         <height>32</height>
-        </rect>
-       </property>
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="standardButtons">
-        <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-       </property>
-       <property name="centerButtons">
-        <bool>false</bool>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="Username">
-       <property name="geometry">
-        <rect>
-         <x>240</x>
-         <y>250</y>
-         <width>191</width>
-         <height>21</height>
-        </rect>
-       </property>
+       <widget class="QWidget" name="">
+        <property name="geometry">
+         <rect>
+          <x>40</x>
+          <y>80</y>
+          <width>215</width>
+          <height>101</height>
+         </rect>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_2">
+         <item>
+          <layout class="QVBoxLayout" name="verticalLayout">
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout">
+             <item>
+              <widget class="QLabel" name="label">
+               <property name="text">
+                <string>Username:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="Username"/>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_2">
+             <item>
+              <widget class="QLabel" name="label_2">
+               <property name="text">
+                <string>Password:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="Password">
+               <property name="echoMode">
+                <enum>QLineEdit::Password</enum>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <widget class="QPushButton" name="Login">
+           <property name="text">
+            <string>Login</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
       </widget>
      </widget>
      <widget class="QWidget" name="page_2">
-      <widget class="QPushButton" name="DownloadButton">
-       <property name="geometry">
-        <rect>
-         <x>1040</x>
-         <y>630</y>
-         <width>111</width>
-         <height>21</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Download Files</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="pushButton_2">
-       <property name="geometry">
-        <rect>
-         <x>920</x>
-         <y>630</y>
-         <width>101</width>
-         <height>21</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Logout</string>
-       </property>
-      </widget>
       <widget class="QLabel" name="label_3">
        <property name="geometry">
         <rect>
-         <x>360</x>
-         <y>120</y>
-         <width>431</width>
-         <height>201</height>
+         <x>160</x>
+         <y>10</y>
+         <width>221</width>
+         <height>81</height>
         </rect>
        </property>
        <property name="text">
         <string>Welcome, Here are your files:</string>
        </property>
       </widget>
-      <widget class="QLineEdit" name="DownloadLocation">
+      <widget class="QWidget" name="">
        <property name="geometry">
         <rect>
-         <x>340</x>
-         <y>300</y>
-         <width>241</width>
-         <height>21</height>
+         <x>170</x>
+         <y>270</y>
+         <width>198</width>
+         <height>24</height>
         </rect>
        </property>
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <widget class="QLabel" name="label_6">
+          <property name="text">
+           <string>Select Download Location:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="toolButton">
+          <property name="text">
+           <string>...</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </widget>
-      <widget class="QLabel" name="label_6">
+      <widget class="QSplitter" name="splitter">
        <property name="geometry">
         <rect>
-         <x>169</x>
-         <y>300</y>
-         <width>141</width>
-         <height>20</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Download Location:</string>
-       </property>
-      </widget>
-     </widget>
-     <widget class="QWidget" name="page_3">
-      <widget class="QProgressBar" name="DownloadProgress">
-       <property name="geometry">
-        <rect>
-         <x>420</x>
-         <y>290</y>
-         <width>601</width>
-         <height>191</height>
-        </rect>
-       </property>
-       <property name="value">
-        <number>24</number>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_4">
-       <property name="geometry">
-        <rect>
-         <x>550</x>
-         <y>410</y>
-         <width>211</width>
-         <height>31</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Downloading: 20%</string>
-       </property>
-      </widget>
-     </widget>
-     <widget class="QWidget" name="page_4">
-      <widget class="QLabel" name="label_5">
-       <property name="geometry">
-        <rect>
-         <x>530</x>
-         <y>260</y>
-         <width>141</width>
-         <height>51</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Download Complete!</string>
-       </property>
-      </widget>
-      <widget class="QDialogButtonBox" name="buttonBox">
-       <property name="geometry">
-        <rect>
-         <x>980</x>
-         <y>530</y>
-         <width>164</width>
+         <x>330</x>
+         <y>350</y>
+         <width>219</width>
          <height>32</height>
         </rect>
        </property>
-       <property name="standardButtons">
-        <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
        </property>
+       <widget class="QPushButton" name="pushButton_2">
+        <property name="text">
+         <string>Logout</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="DownloadButton">
+        <property name="text">
+         <string>Download Files</string>
+        </property>
+       </widget>
+      </widget>
+     </widget>
+     <widget class="QWidget" name="page_3">
+      <widget class="QWidget" name="">
+       <property name="geometry">
+        <rect>
+         <x>510</x>
+         <y>260</y>
+         <width>164</width>
+         <height>65</height>
+        </rect>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_2">
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_5">
+          <property name="text">
+           <string>Download Complete!</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QDialogButtonBox" name="buttonBox">
+          <property name="standardButtons">
+           <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </widget>
      </widget>
     </widget>
@@ -214,38 +186,5 @@
   </layout>
  </widget>
  <resources/>
- <connections>
-  <connection>
-   <sender>Login</sender>
-   <signal>rejected()</signal>
-   <receiver>Dialog</receiver>
-   <slot>reject()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>316</x>
-     <y>260</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>286</x>
-     <y>274</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>Login</sender>
-   <signal>accepted()</signal>
-   <receiver>Dialog</receiver>
-   <slot>update()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>248</x>
-     <y>254</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>157</x>
-     <y>274</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>
