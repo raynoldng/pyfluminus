@@ -1,6 +1,7 @@
 from pyfluminus.authorization import vafs_jwt
 from pyfluminus import api
 from pyfluminus.structs import File, Module
+from pyfluminus.gui_file_dialog import FileDialog
 from typing import Dict, List
 
 from PyQt5 import uic
@@ -12,20 +13,10 @@ Form, Window = uic.loadUiType("pyfluminus.ui")
 app = QApplication([])
 window = Window()
 
+FILE_DOWNLOAD_DIR = None
 
-def download_files(file: File, auth: Dict, verbose=False):
-    download_path = form.DownloadLocation.text()
-    for module in modules:
-        if module is None:
-            continue
-        if module.code in ignored_modules:
-            actually_ignored_modules.append(module)
-            continue
-        print("{} {}".format(module.code, module.name))
-        module_file = File.from_module(auth, module)
-        # TODO set verbose=True for now
-        download_files(module_file, auth, True)
-        
+
+def download_files(file: File, auth: Dict, download_path: str, verbose=False):
     if not file.directory:
         full_file_path = os.path.join(download_path, file.name)
         if os.path.exists(full_file_path):
@@ -35,13 +26,31 @@ def download_files(file: File, auth: Dict, verbose=False):
         return
     download_path = os.path.join(download_path, file.name)
     if file.children is None:
-        file.load_children(auth)
-        if file.children is None:
+        file.load_children(auth) 
+        if file.children is None: 
             print("Error loading children for file: {}".format(file.name))
             return
     for child in file.children:
         download_files(child, auth, download_path, verbose)
-    form.stackedWidget.setCurrentIndex(3)
+
+def download():
+    print("\n\nDownloading Files to {}".format(FILE_DOWNLOAD_DIR))
+    actually_ignored_modules = []
+    for module in modules:
+        if module is None:
+            continue
+        if module.code in ignored_modules:
+            actually_ignored_modules.append(module)
+            continue
+        print("{} {}".format(module.code, module.name))
+        module_file = File.from_module(auth, module)
+        # TODO set verbose=True for now
+        download_files(module_file, auth, FILE_DOWNLOAD_DIR, True)
+    if actually_ignored_modules:
+        print("Ignored the following module(s)")
+        for module in actually_ignored_modules:
+            print("- {} {}".format(module.code, module.name))
+    print("\nDONE")
 
 
 def display_incorrect_login_message():
@@ -51,6 +60,21 @@ def display_incorrect_login_message():
     msg.setInformativeText("You have entered an incorrect Username or Password")
     msg.setWindowTitle("Incorrect Username/Password")
     msg.exec_()
+
+
+def display_download_complete():
+    msg = QMessageBox()
+    msg.setIcon(QMessageBox.Information)
+    msg.setText("Download Complete!")
+    msg.exec_()
+
+def display_file_browser():
+    dialog = FileDialog()
+    # TODO: Find a way to get rid of this global
+    FILE_DOWNLOAD_DIR = dialog.openFileNameDialog()
+    form.DownloadLocation.setText("Download Location:" + FILE_DOWNLOAD_DIR)
+
+        
 
 def login():
     username = form.Username.text()
@@ -66,6 +90,7 @@ def login():
     print("Hello {}".format(name_res.data))
     get_modules_taken(auth)
     form.stackedWidget.setCurrentIndex(1)
+
 
 
 def get_modules_taken(auth):
@@ -86,7 +111,8 @@ form.setupUi(window)
 # Configure messages
 
 form.Login.clicked.connect(login)
-# form.DownloadButton.clicked.connect(download_files())
+form.Browse.clicked.connect(display_file_browser)
+form.DownloadButton.clicked.connect(download)
 
 window.show()
 app.exec_()
