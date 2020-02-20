@@ -1,3 +1,4 @@
+import os
 from pyfluminus.authorization import vafs_jwt
 from pyfluminus import api
 from pyfluminus.structs import File, Module
@@ -26,6 +27,11 @@ def download_files(file: File, auth: Dict, download_path: str, verbose=False):
         print("- {}".format(full_file_path))
         file.download(auth, download_path, verbose)
         return
+    print(
+        "This is the dl path {} and this is the file name: {}".format(
+            download_path, file.name
+        )
+    )
     download_path = os.path.join(download_path, file.name)
     if file.children is None:
         file.load_children(auth)
@@ -37,26 +43,19 @@ def download_files(file: File, auth: Dict, download_path: str, verbose=False):
 
 
 def download():
-    # TODO: Somehow get auth data here
     modules_res = api.modules(auth)
-    modules = module_res.data
+    modules = modules_res.data
     print("\n\nDownloading Files to {}".format(FILE_DOWNLOAD_DIR))
     actually_ignored_modules = []
     for module in modules:
         if module is None:
             continue
-        if module.code in ignored_modules:
-            actually_ignored_modules.append(module)
-            continue
         print("{} {}".format(module.code, module.name))
         module_file = File.from_module(auth, module)
         # TODO set verbose=True for now
         download_files(module_file, auth, FILE_DOWNLOAD_DIR, True)
-    if actually_ignored_modules:
-        print("Ignored the following module(s)")
-        for module in actually_ignored_modules:
-            print("- {} {}".format(module.code, module.name))
     print("\nDONE")
+    display_download_complete()
 
 
 def display_incorrect_login_message():
@@ -73,16 +72,19 @@ def display_download_complete():
     msg.setIcon(QMessageBox.Information)
     msg.setText("Download Complete!")
     msg.exec_()
+    exit()
 
 
 def display_file_browser():
     dialog = FileDialog()
+    global FILE_DOWNLOAD_DIR
     # TODO: Find a way to get rid of this global
     FILE_DOWNLOAD_DIR = dialog.openFileNameDialog()
     form.DownloadLocation.setText("Download Location:" + FILE_DOWNLOAD_DIR)
 
 
 def login():
+    global auth
     username = form.Username.text()
     password = form.Password.text()
     auth = vafs_jwt("nusstu\\" + username, password)
