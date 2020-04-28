@@ -53,7 +53,6 @@ class TestModule(unittest.TestCase):
         self.assertIsNone(Module.from_api({}))
 
     def test_get_lesssons(self):
-        module_id = "9db79e1f-4b15-4fe9-8783-363990eeff09"
         test_module = Module(
                 id='9db79e1f-4b15-4fe9-8783-363990eeff09',
                 code='CS4261/CS5461',

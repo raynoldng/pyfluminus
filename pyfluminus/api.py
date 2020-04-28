@@ -9,7 +9,6 @@ import json
 from dateutil.parser import parse as date_parse
 
 from typing import Dict, List, TYPE_CHECKING, Optional
-
 if TYPE_CHECKING:
     from pyfluminus.structs import Module, File, Lesson
 
@@ -37,7 +36,9 @@ def current_term(auth: Dict) -> Result:
     return ErrorResult(ErrorTypes.UnexpectedResponse, response)
 
 
-def modules(auth: Dict, current_term_only: bool = False) -> Result[List[Optional[Module]]]:
+def modules(
+    auth: Dict, current_term_only: bool = False
+) -> Result[List[Optional[Module]]]:
     """ returns list of modules that user with given authorization is reading
     """
     from pyfluminus.structs import Module
@@ -55,7 +56,6 @@ def get_announcements(auth: Dict, module_id: str, archive: bool) -> Result:
     )
     response = api(auth, uri)["ok"]
     if "data" in response:
-        announcements = response["data"]
         result_data = []
         for announcement in response["data"]:
             if not all(key in announcement for key in fields):
