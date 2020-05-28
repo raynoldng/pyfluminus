@@ -54,7 +54,7 @@ optional arguments:
 ```
 # Extending pyFluminus
 
-The original goal for this project was a barebones CLI interface for downloading LumiNUS files. I can imagine that a GUI wrapper would be a strong use case and a useful tool for users not comfortable with CLI tools. 
+The original goal for this project was a barebones CLI interface for downloading LumiNUS files. I can imagine that a GUI wrapper would be a strong use case and a useful tool for users not comfortable with CLI tools. You can see a working example [here](https://github.com/J0/pyfluminus_gui/tree/j0_pyfluminus_gui).
 
 To assist with that, there is the `pyfluminus.fluminus.get_links_for_module` utility function that returns all of the download links of a module.
 
